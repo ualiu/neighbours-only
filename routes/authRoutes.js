@@ -7,6 +7,20 @@ const { ensureGuest, ensureProfileIncomplete } = require('../middleware/auth');
 // @route   GET /
 router.get('/', ensureGuest, authController.showLanding);
 
+// @route   GET /terms
+router.get('/terms', (req, res) => {
+  res.render('terms', {
+    title: 'Terms of Service - Neighbours Only'
+  });
+});
+
+// @route   GET /privacy
+router.get('/privacy', (req, res) => {
+  res.render('privacy', {
+    title: 'Privacy Policy - Neighbours Only'
+  });
+});
+
 // @route   GET /auth/google
 router.get(
   '/auth/google',

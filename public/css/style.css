@@ -411,8 +411,224 @@ h1, h2, h3, h4, h5, h6, p, a, button, input, textarea, select, label, span, div 
 }
 
 /* Landing Page Styles */
-.min-vh-100 {
+.landing-page {
     min-height: 100vh;
+    padding: 2rem 0;
+}
+
+/* Hero Section */
+.landing-title {
+    font-size: 3rem;
+    line-height: 1.2;
+    color: #222;
+    letter-spacing: -0.02em;
+}
+
+.landing-subtitle {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: #717171;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* CTA Button */
+.landing-cta-btn {
+    font-weight: 600;
+    padding: 1rem 2.5rem;
+    font-size: 1.125rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+    transition: all 0.3s ease;
+    min-width: 280px;
+}
+
+.landing-cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3);
+}
+
+.landing-cta-btn i {
+    font-size: 1.2rem;
+}
+
+/* Features Section - No Cards */
+.features-section {
+    padding-top: 3rem;
+}
+
+.feature-icon {
+    font-size: 3rem;
+    display: block;
+}
+
+.feature-title {
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: #222;
+}
+
+.feature-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 767px) {
+    .landing-page {
+        padding: 1.5rem 0;
+    }
+
+    .landing-title {
+        font-size: 2.25rem;
+    }
+
+    .landing-subtitle {
+        font-size: 1.1rem;
+    }
+
+    .landing-cta-btn {
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+        min-width: 100%;
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+    }
+
+    .feature-title {
+        font-size: 1.125rem;
+    }
+
+    .feature-text {
+        font-size: 0.9rem;
+    }
+}
+
+/* Small Mobile */
+@media (max-width: 575px) {
+    .landing-page {
+        padding: 1rem 0;
+    }
+
+    .landing-title {
+        font-size: 2rem;
+    }
+
+    .landing-subtitle {
+        font-size: 1rem;
+    }
+
+    .landing-cta-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    .landing-cta-btn i {
+        font-size: 1rem;
+    }
+
+    .feature-icon {
+        font-size: 2.25rem;
+    }
+
+    .feature-title {
+        font-size: 1rem;
+    }
+
+    .feature-text {
+        font-size: 0.85rem;
+    }
+}
+
+/* Landscape Mode on Mobile */
+@media (max-width: 767px) and (orientation: landscape) {
+    .landing-page {
+        padding: 1rem 0;
+    }
+
+    .landing-title {
+        font-size: 2rem;
+        margin-bottom: 1rem !important;
+    }
+
+    .landing-subtitle {
+        font-size: 1rem;
+        margin-bottom: 1.5rem !important;
+    }
+
+    .features-section {
+        padding-top: 2rem !important;
+    }
+}
+
+/* Legal Links under CTA */
+.legal-links-small {
+    font-size: 0.75rem;
+    margin-top: -1.5rem;
+}
+
+.legal-links-small a {
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.legal-links-small a:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Legal Pages */
+.legal-page {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.legal-content h2 {
+    color: #222;
+    margin-top: 2rem;
+}
+
+.legal-content h3 {
+    color: #444;
+}
+
+.legal-content p {
+    color: #555;
+    line-height: 1.7;
+}
+
+.legal-content ul {
+    color: #555;
+    line-height: 1.7;
+    margin-left: 1.5rem;
+}
+
+.legal-content ul li {
+    margin-bottom: 0.5rem;
+}
+
+.legal-content section:first-child h2 {
+    margin-top: 0;
+}
+
+@media (max-width: 767px) {
+    .legal-page .card-body {
+        padding: 1.5rem !important;
+    }
+
+    .legal-page h1 {
+        font-size: 2rem;
+    }
+
+    .legal-content h2 {
+        font-size: 1.25rem;
+    }
+
+    .legal-content h3 {
+        font-size: 1.1rem;
+    }
 }
 
 /* Form Styles */
