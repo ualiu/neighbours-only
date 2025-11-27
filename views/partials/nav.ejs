@@ -1,0 +1,117 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container-fluid px-3">
+        <div class="d-flex w-100 align-items-center">
+            <!-- Left: Brand/Logo -->
+            <div class="navbar-left">
+                <a class="navbar-brand fw-bold text-primary m-0" href="/neighborhood">
+                    <i class="bi bi-house-heart-fill"></i>
+                    <span class="d-none d-xl-inline"><%= typeof neighborhood !== 'undefined' ? neighborhood.name : 'Neighborhood' %></span>
+                </a>
+            </div>
+
+            <!-- Center: Icon Navigation (Desktop) -->
+            <div class="navbar-center d-none d-lg-flex flex-grow-1 justify-content-center">
+                <a href="/neighborhood" class="nav-icon-btn" title="Feed">
+                    <i class="bi bi-house-door-fill"></i>
+                </a>
+                <a href="/neighborhood/members" class="nav-icon-btn" title="Neighbours">
+                    <i class="bi bi-people-fill"></i>
+                </a>
+                <button type="button" class="nav-icon-btn" title="Search" data-bs-toggle="modal" data-bs-target="#searchModal">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+
+            <!-- Right: User Profile -->
+            <div class="navbar-right d-flex align-items-center gap-2">
+                <div class="dropdown">
+                    <button class="btn btn-link text-decoration-none p-0" type="button" id="navbarDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="<%= user.avatar %>" alt="<%= user.displayName %>" class="rounded-circle border border-2 border-primary" width="40" height="40">
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="navbarDropdown">
+                        <li>
+                            <div class="dropdown-item-text">
+                                <div class="d-flex align-items-center">
+                                    <img src="<%= user.avatar %>" alt="<%= user.displayName %>" class="rounded-circle me-2" width="36" height="36">
+                                    <div>
+                                        <strong class="d-block"><%= user.displayName %></strong>
+                                        <small class="text-muted">View profile</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/auth/logout"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Bottom Nav -->
+        <div class="mobile-nav d-lg-none">
+            <a href="/neighborhood" class="mobile-nav-item">
+                <i class="bi bi-house-door-fill"></i>
+                <span>Feed</span>
+            </a>
+            <a href="/neighborhood/members" class="mobile-nav-item">
+                <i class="bi bi-people-fill"></i>
+                <span>Neighbours</span>
+            </a>
+            <button type="button" class="mobile-nav-item" data-bs-toggle="modal" data-bs-target="#searchModal">
+                <i class="bi bi-search"></i>
+                <span>Search</span>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- Search Modal -->
+<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title" id="searchModalLabel">
+                    <i class="bi bi-search"></i> Search Posts
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-2">
+                <form action="/neighborhood/search" method="GET" id="searchModalForm">
+                    <div class="mb-3">
+                        <div class="search-modal-input-wrapper">
+                            <i class="bi bi-search search-modal-icon"></i>
+                            <input
+                                type="text"
+                                name="q"
+                                class="form-control search-modal-input"
+                                placeholder="Search in <%= typeof neighborhood !== 'undefined' ? neighborhood.name : 'your neighborhood' %>..."
+                                value="<%= typeof query !== 'undefined' ? query : '' %>"
+                                autofocus
+                            >
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-search"></i> Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% if (typeof messages !== 'undefined' && messages) { %>
+    <% if (messages.success) { %>
+        <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
+            <%= messages.success %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% } %>
+    <% if (messages.error) { %>
+        <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
+            <%= messages.error %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <% } %>
+<% } %>

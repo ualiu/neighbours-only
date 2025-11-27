@@ -1,0 +1,32 @@
+<%- include('partials/header') %>
+
+<div class="min-vh-100 d-flex align-items-center bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 text-center">
+                <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 5rem;"></i>
+                <h1 class="display-4 fw-bold mt-3">Oops!</h1>
+                <h2 class="mb-4">Something went wrong</h2>
+                <p class="lead mb-4">
+                    We're sorry, but something unexpected happened. Please try again later.
+                </p>
+
+                <% if (error && error.message) { %>
+                    <div class="alert alert-danger text-start">
+                        <strong>Error:</strong> <%= error.message %>
+                        <% if (error.stack) { %>
+                            <pre class="mt-2 text-start"><%= error.stack %></pre>
+                        <% } %>
+                    </div>
+                <% } %>
+
+                <a href="<%= user ? '/neighborhood' : '/' %>" class="btn btn-primary btn-lg">
+                    <i class="bi bi-house"></i>
+                    <%= user ? 'Go to Neighborhood' : 'Go to Home' %>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

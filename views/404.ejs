@@ -1,0 +1,21 @@
+<%- include('partials/header') %>
+
+<div class="min-vh-100 d-flex align-items-center bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 text-center">
+                <h1 class="display-1 fw-bold text-primary">404</h1>
+                <h2 class="mb-4">Page Not Found</h2>
+                <p class="lead mb-4">
+                    Sorry, the page you're looking for doesn't exist.
+                </p>
+                <a href="<%= user ? '/neighborhood' : '/' %>" class="btn btn-primary btn-lg">
+                    <i class="bi bi-house"></i>
+                    <%= user ? 'Go to Neighborhood' : 'Go to Home' %>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

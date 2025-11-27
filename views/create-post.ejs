@@ -1,0 +1,104 @@
+<%- include('partials/header') %>
+<%- include('partials/nav') %>
+
+<div class="container mt-3 mt-md-4">
+    <div class="row">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-6 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-plus-circle"></i> Create a Post</h4>
+                </div>
+                <div class="card-body p-3 p-sm-4">
+                    <% if (typeof messages !== 'undefined' && messages) { %>
+                        <% if (messages.error) { %>
+                            <div class="alert alert-danger" role="alert">
+                                <%= messages.error %>
+                            </div>
+                        <% } %>
+                    <% } %>
+
+                    <form action="/posts/create" method="POST" enctype="multipart/form-data" id="postForm">
+                        <div class="mb-3">
+                            <label for="text" class="form-label">What's on your mind?</label>
+                            <textarea
+                                class="form-control"
+                                id="text"
+                                name="text"
+                                rows="5"
+                                maxlength="2000"
+                                required
+                                placeholder="Share something with your neighborhood..."
+                            ></textarea>
+                            <div class="form-text">
+                                <span id="charCount">0</span> / 2000 characters
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Add an Image (Optional)</label>
+                            <input
+                                type="file"
+                                class="form-control"
+                                id="image"
+                                name="image"
+                                accept="image/jpeg,image/jpg,image/png,image/gif"
+                            >
+                            <div class="form-text">
+                                Max file size: 5MB. Accepted formats: JPG, PNG, GIF
+                            </div>
+                            <div id="imagePreview" class="mt-3"></div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="/neighborhood" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send"></i> Post
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Character counter
+    const textarea = document.getElementById('text');
+    const charCount = document.getElementById('charCount');
+
+    textarea.addEventListener('input', function() {
+        charCount.textContent = this.value.length;
+    });
+
+    // Image preview
+    const imageInput = document.getElementById('image');
+    const imagePreview = document.getElementById('imagePreview');
+
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+
+        if (file) {
+            // Check file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                this.value = '';
+                imagePreview.innerHTML = '';
+                return;
+            }
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.innerHTML = `
+                    <img src="${e.target.result}" class="img-fluid rounded" style="max-height: 300px;">
+                `;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            imagePreview.innerHTML = '';
+        }
+    });
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,58 @@
+<%- include('partials/header') %>
+
+<div class="min-vh-100 d-flex align-items-center bg-light">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <h1 class="display-3 fw-bold mb-4">Neighbours Only</h1>
+        <p class="lead mb-5">A social network for your neighbourhood.</p>
+
+        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+          <a href="/auth/google" class="btn btn-primary btn-lg px-4 gap-3">
+            <i class="bi bi-google"></i> Sign Up with Google
+          </a>
+        </div>
+
+        <div class="mt-5 pt-5">
+          <div class="row g-4">
+            <div class="col-md-4">
+              <i
+                class="bi bi-geo-alt-fill text-primary"
+                style="font-size: 3rem"
+              ></i>
+              <h5 class="mt-3">Hyper Local</h5>
+              <p class="text-muted">
+                You’re matched to your micro-community based around your actual
+                address.
+              </p>
+            </div>
+            <div class="col-md-4">
+              <i
+                class="bi bi-chat-dots-fill text-primary"
+                style="font-size: 3rem"
+              ></i>
+              <h5 class="mt-3">No Outsiders</h5>
+              <p class="text-muted">
+                Only real neighbours can join your space. No strangers, no bots,
+                no advertisers pushing products.
+              </p>
+            </div>
+            <div class="col-md-4">
+              <i
+                class="bi bi-shield-fill-check text-primary"
+                style="font-size: 3rem"
+              ></i>
+              <h5 class="mt-3">AI Moderated</h5>
+              <p class="text-muted">
+                Our AI checks every post to keep things respectful, helpful, and
+                drama-free.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

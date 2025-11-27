@@ -1,0 +1,392 @@
+<%- include('partials/header') %>
+<%- include('partials/nav') %>
+
+<div class="container-fluid mt-4">
+    <!-- Neighbours Header -->
+    <div class="card mb-3 bg-primary text-white" style="max-width: 1400px; margin: 0 auto;">
+        <div class="card-body text-center">
+            <h2 class="card-title mb-2">
+                <i class="bi bi-people-fill"></i>
+                Your Neighbours
+            </h2>
+            <p class="mb-0">
+                <span id="neighbourCount"><%= neighbours.length %></span> <%= neighbours.length === 1 ? 'neighbour' : 'neighbours' %> in <%= neighborhood.name %>
+            </p>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="neighbours-search-container" style="max-width: 1400px; margin: 0 auto 1.5rem auto; padding: 0 1rem;">
+        <div class="search-input-wrapper-neighbours">
+            <i class="bi bi-search search-icon-neighbours"></i>
+            <input
+                type="text"
+                id="neighbourSearch"
+                class="form-control search-input-neighbours"
+                placeholder="Search neighbours by name..."
+                autocomplete="off"
+            >
+            <button type="button" class="btn-clear-search" id="clearSearch" style="display: none;">
+                <i class="bi bi-x-circle-fill"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Map and Neighbours Container -->
+    <div class="neighbours-container">
+        <!-- Map (Top on mobile, Right on desktop) -->
+        <div class="map-container">
+            <div id="neighboursMap" class="neighbours-map"></div>
+        </div>
+
+        <!-- Neighbours List (Left on desktop, Bottom on mobile) -->
+        <div class="neighbours-list-container">
+            <div class="row g-3">
+                <% if (neighbours.length === 0) { %>
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body text-center py-5">
+                                <i class="bi bi-people text-muted" style="font-size: 4rem;"></i>
+                                <h4 class="mt-3">No neighbours yet</h4>
+                                <p class="text-muted">You're the first one here!</p>
+                            </div>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <% neighbours.forEach(function(neighbour, index) {
+                        // Extract street name from address (remove house number)
+                        let streetName = '';
+                        if (neighbour.address && neighbour.address.formatted) {
+                            const addressParts = neighbour.address.formatted.split(',');
+                            if (addressParts.length > 0) {
+                                // Get first part and remove leading numbers
+                                const firstPart = addressParts[0].trim();
+                                streetName = firstPart.replace(/^\d+\s*/, '');
+                            }
+                        }
+                    %>
+                        <div class="col-12 col-md-6 col-xl-4">
+                            <div class="card h-100 neighbour-card" data-neighbour-index="<%= index %>">
+                                <div class="card-body p-3">
+                                    <div class="text-center mb-3">
+                                        <img
+                                            src="<%= neighbour.avatar %>"
+                                            alt="<%= neighbour.displayName %>"
+                                            class="rounded-circle mb-2"
+                                            width="80"
+                                            height="80"
+                                        >
+                                        <h5 class="mb-1"><%= neighbour.displayName %></h5>
+                                        <% if (neighbour._id.toString() === user._id.toString()) { %>
+                                            <span class="badge bg-primary mb-2">You</span>
+                                        <% } %>
+                                    </div>
+                                    <div class="neighbour-info">
+                                        <% if (streetName) { %>
+                                            <p class="mb-2">
+                                                <i class="bi bi-geo-alt-fill text-primary"></i>
+                                                <small class="text-muted"><%= streetName %></small>
+                                            </p>
+                                        <% } %>
+                                        <p class="mb-0">
+                                            <i class="bi bi-calendar-check text-success"></i>
+                                            <small class="text-muted">
+                                                Joined <%= new Date(neighbour.createdAt).toLocaleDateString('en-US', {
+                                                    month: 'long',
+                                                    year: 'numeric'
+                                                }) %>
+                                            </small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } %>
+            </div>
+
+            <!-- Back to Feed -->
+            <div class="text-center mt-4 mb-4">
+                <a href="/neighborhood" class="btn btn-primary">
+                    <i class="bi bi-arrow-left"></i> Back to Feed
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Google Maps Script -->
+<script src="https://maps.googleapis.com/maps/api/js?key=<%= process.env.GOOGLE_PLACES_API_KEY %>&libraries=places,geometry"></script>
+
+<script>
+// Neighbours data for map
+const neighboursData = [
+    <% neighbours.forEach(function(neighbour, index) { %>
+        <% if (neighbour.address && neighbour.address.lat && neighbour.address.lng) { %>
+        {
+            name: '<%= neighbour.displayName %>',
+            avatar: '<%= neighbour.avatar %>',
+            lat: <%= neighbour.address.lat %>,
+            lng: <%= neighbour.address.lng %>,
+            isCurrentUser: <%= neighbour._id.toString() === user._id.toString() %>
+        }<%= index < neighbours.length - 1 ? ',' : '' %>
+        <% } %>
+    <% }) %>
+];
+
+let map;
+let markers = [];
+let neighborhoodBoundary;
+let neighborhoodCenter;
+
+function initMap() {
+    if (neighboursData.length === 0) return;
+
+    // Calculate center of all neighbours
+    const bounds = new google.maps.LatLngBounds();
+    let totalLat = 0;
+    let totalLng = 0;
+
+    neighboursData.forEach(neighbour => {
+        bounds.extend(new google.maps.LatLng(neighbour.lat, neighbour.lng));
+        totalLat += neighbour.lat;
+        totalLng += neighbour.lng;
+    });
+
+    // Calculate neighborhood center from average of all neighbors
+    neighborhoodCenter = {
+        lat: totalLat / neighboursData.length,
+        lng: totalLng / neighboursData.length
+    };
+
+    console.log('Neighborhood center:', neighborhoodCenter);
+    console.log('Total neighbors:', neighboursData.length);
+
+    // Initialize map with Airbnb-style settings
+    map = new google.maps.Map(document.getElementById('neighboursMap'), {
+        center: bounds.getCenter(),
+        zoom: 15,
+        maxZoom: 15,
+        styles: [
+            {
+                "featureType": "poi",
+                "elementType": "labels",
+                "stylers": [{ "visibility": "off" }]
+            },
+            {
+                "featureType": "transit",
+                "elementType": "labels.icon",
+                "stylers": [{ "visibility": "off" }]
+            },
+            {
+                "featureType": "poi.business",
+                "stylers": [{ "visibility": "off" }]
+            }
+        ],
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        zoomControl: true,
+        zoomControlOptions: {
+            position: google.maps.ControlPosition.RIGHT_TOP
+        },
+        gestureHandling: 'greedy',
+        backgroundColor: '#f0f2f5'
+    });
+
+    // Fit bounds with padding
+    map.fitBounds(bounds, { top: 60, right: 60, bottom: 60, left: 60 });
+
+    // Draw neighborhood boundary after a short delay to ensure map is ready
+    setTimeout(() => {
+        try {
+            // Calculate neighborhood boundary radius
+            let maxDistance = 0;
+            neighboursData.forEach(neighbour => {
+                const distance = google.maps.geometry.spherical.computeDistanceBetween(
+                    new google.maps.LatLng(neighborhoodCenter.lat, neighborhoodCenter.lng),
+                    new google.maps.LatLng(neighbour.lat, neighbour.lng)
+                );
+                if (distance > maxDistance) {
+                    maxDistance = distance;
+                }
+            });
+
+            // Add 50% padding to the radius, with a minimum of 800 meters
+            let boundaryRadius = Math.max(maxDistance * 1.5, 800);
+
+            console.log('Drawing boundary circle:', {
+                center: neighborhoodCenter,
+                radius: boundaryRadius,
+                maxDistance: maxDistance
+            });
+
+            // Draw neighborhood boundary circle
+            neighborhoodBoundary = new google.maps.Circle({
+                strokeColor: '#DC3545',
+                strokeOpacity: 1,
+                strokeWeight: 5,
+                fillColor: '#DC3545',
+                fillOpacity: 0.15,
+                map: map,
+                center: new google.maps.LatLng(neighborhoodCenter.lat, neighborhoodCenter.lng),
+                radius: boundaryRadius,
+                clickable: false,
+                zIndex: 0,
+                editable: false
+            });
+
+            console.log('Boundary circle created successfully!');
+        } catch (error) {
+            console.error('Error creating boundary circle:', error);
+        }
+    }, 500);
+
+    // Add markers for each neighbour
+    neighboursData.forEach((neighbour, index) => {
+        // Create custom marker with avatar
+        const markerSize = neighbour.isCurrentUser ? 48 : 40;
+
+        const marker = new google.maps.Marker({
+            position: { lat: neighbour.lat, lng: neighbour.lng },
+            map: map,
+            title: neighbour.name,
+            icon: {
+                url: neighbour.avatar,
+                scaledSize: new google.maps.Size(markerSize, markerSize),
+                anchor: new google.maps.Point(markerSize / 2, markerSize / 2),
+                shape: {
+                    type: 'circle',
+                    coords: [markerSize / 2, markerSize / 2, markerSize / 2]
+                }
+            },
+            animation: google.maps.Animation.DROP,
+            zIndex: neighbour.isCurrentUser ? 1000 : index,
+            optimized: false
+        });
+
+        // Add info window with improved styling
+        const infoWindow = new google.maps.InfoWindow({
+            content: `
+                <div class="neighbour-info-window">
+                    <div style="text-align: center;">
+                        <img src="${neighbour.avatar}" alt="${neighbour.name}">
+                        <div class="name">${neighbour.name}</div>
+                        ${neighbour.isCurrentUser ? '<div class="badge">You</div>' : ''}
+                    </div>
+                </div>
+            `,
+            disableAutoPan: false
+        });
+
+        marker.addListener('click', () => {
+            // Close all other info windows
+            markers.forEach(m => m.infoWindow.close());
+            infoWindow.open(map, marker);
+        });
+
+        markers.push({ marker, infoWindow });
+    });
+}
+
+// Initialize map when page loads
+document.addEventListener('DOMContentLoaded', initMap);
+
+// Handle card hover to highlight marker
+document.querySelectorAll('.neighbour-card').forEach((card, index) => {
+    card.addEventListener('mouseenter', () => {
+        if (markers[index]) {
+            markers[index].marker.setAnimation(google.maps.Animation.BOUNCE);
+            setTimeout(() => {
+                markers[index].marker.setAnimation(null);
+            }, 700);
+        }
+    });
+});
+
+// Search functionality
+const searchInput = document.getElementById('neighbourSearch');
+const clearSearchBtn = document.getElementById('clearSearch');
+const neighbourCards = document.querySelectorAll('.neighbour-card');
+const neighbourCountEl = document.getElementById('neighbourCount');
+
+function filterNeighbours(searchTerm) {
+    const term = searchTerm.toLowerCase().trim();
+    let visibleCount = 0;
+
+    neighbourCards.forEach((card, index) => {
+        const neighbourName = card.querySelector('h5').textContent.toLowerCase();
+        const isMatch = neighbourName.includes(term);
+
+        if (isMatch) {
+            card.closest('.col-12').style.display = '';
+            visibleCount++;
+            // Show marker on map
+            if (markers[index]) {
+                markers[index].marker.setVisible(true);
+            }
+        } else {
+            card.closest('.col-12').style.display = 'none';
+            // Hide marker on map
+            if (markers[index]) {
+                markers[index].marker.setVisible(false);
+            }
+        }
+    });
+
+    // Update count
+    neighbourCountEl.textContent = visibleCount;
+
+    // Show/hide clear button
+    if (term.length > 0) {
+        clearSearchBtn.style.display = 'block';
+    } else {
+        clearSearchBtn.style.display = 'none';
+    }
+
+    // Adjust map bounds to show only visible markers
+    if (visibleCount > 0 && map) {
+        const visibleBounds = new google.maps.LatLngBounds();
+        markers.forEach((m, index) => {
+            if (m.marker.getVisible()) {
+                visibleBounds.extend(m.marker.getPosition());
+            }
+        });
+        // Include the boundary circle in the bounds
+        if (neighborhoodBoundary) {
+            visibleBounds.extend(new google.maps.LatLng(
+                neighborhoodCenter.lat + (neighborhoodBoundary.getRadius() / 111320),
+                neighborhoodCenter.lng
+            ));
+            visibleBounds.extend(new google.maps.LatLng(
+                neighborhoodCenter.lat - (neighborhoodBoundary.getRadius() / 111320),
+                neighborhoodCenter.lng
+            ));
+        }
+        map.fitBounds(visibleBounds, { top: 60, right: 60, bottom: 60, left: 60 });
+    }
+}
+
+// Search input event listener
+searchInput.addEventListener('input', (e) => {
+    filterNeighbours(e.target.value);
+});
+
+// Clear search button
+clearSearchBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    filterNeighbours('');
+    searchInput.focus();
+});
+
+// Allow Enter key to trigger search
+searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        searchInput.value = '';
+        filterNeighbours('');
+        searchInput.blur();
+    }
+});
+</script>
+
+<%- include('partials/footer') %>
