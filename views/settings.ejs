@@ -165,13 +165,17 @@
 <script>
 // Auto-save settings when toggle is switched
 document.getElementById('showAddress').addEventListener('change', function() {
-  const form = document.getElementById('settingsForm');
-  const formData = new FormData(form);
+  const isChecked = this.checked;
 
-  // Submit form via fetch
+  // Submit form via fetch with JSON
   fetch('/settings/update', {
     method: 'POST',
-    body: formData
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      showAddress: isChecked
+    })
   })
   .then(response => {
     if (response.ok) {

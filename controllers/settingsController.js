@@ -22,15 +22,30 @@ exports.updateSettings = async (req, res) => {
   try {
     const { showAddress } = req.body;
 
+    console.log('Updating settings:', { showAddress, type: typeof showAddress });
+
     // Update user settings
     await User.findByIdAndUpdate(req.user._id, {
-      'settings.showAddress': showAddress === 'on',
+      'settings.showAddress': showAddress === true || showAddress === 'on',
     });
+
+    console.log('Settings updated successfully for user:', req.user._id);
+
+    // Send JSON response for AJAX requests
+    if (req.headers['content-type'] === 'application/json') {
+      return res.json({ success: true, message: 'Settings updated' });
+    }
 
     req.flash('success', 'Settings updated successfully');
     res.redirect('/settings');
   } catch (error) {
     console.error('Error updating settings:', error);
+
+    // Send JSON error for AJAX requests
+    if (req.headers['content-type'] === 'application/json') {
+      return res.status(500).json({ success: false, message: 'Unable to update settings' });
+    }
+
     req.flash('error', 'Unable to update settings');
     res.redirect('/settings');
   }
