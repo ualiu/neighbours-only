@@ -62,7 +62,7 @@ exports.showNeighbours = async (req, res) => {
 
     // Get all neighbours from this neighborhood
     const neighbours = await User.find({ neighborhoodId: req.user.neighborhoodId })
-      .select('displayName avatar createdAt address')
+      .select('displayName avatar createdAt address settings')
       .sort({ createdAt: -1 });
 
     res.render('members', {
