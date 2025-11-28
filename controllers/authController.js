@@ -5,7 +5,20 @@ const Neighborhood = require('../models/Neighborhood');
 // @desc    Show landing page
 // @route   GET /
 exports.showLanding = (req, res) => {
-  res.render('index', { user: req.user });
+  // If user is logged in and has completed profile, redirect to neighborhood
+  if (req.user && req.user.hasCompletedProfile) {
+    return res.redirect('/neighborhood');
+  }
+
+  // If user is logged in but hasn't completed profile, redirect to address form
+  if (req.user && !req.user.hasCompletedProfile) {
+    return res.redirect('/signup/address');
+  }
+
+  res.render('index', {
+    user: req.user,
+    messages: req.flash()
+  });
 };
 
 // @desc    Show address signup form
@@ -130,6 +143,94 @@ exports.completeProfile = async (req, res) => {
     req.flash('error', 'An error occurred. Please try again.');
     res.redirect('/signup/address');
   }
+};
+
+// @desc    Sign up with email/password
+// @route   POST /auth/signup
+exports.signup = async (req, res) => {
+  try {
+    const { email, password, displayName } = req.body;
+
+    // Validate input
+    if (!email || !password || !displayName) {
+      req.flash('error', 'Please fill in all fields');
+      return res.redirect('/#authModal');
+    }
+
+    if (password.length < 8) {
+      req.flash('error', 'Password must be at least 8 characters');
+      return res.redirect('/#authModal');
+    }
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      req.flash('error', 'An account with this email already exists');
+      return res.redirect('/#authModal');
+    }
+
+    // Generate avatar from initials
+    const initials = displayName.split(' ').map(n => n[0]).join('');
+    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=0d6efd&color=fff&size=200`;
+
+    // Create new user
+    const user = await User.create({
+      email: email.toLowerCase(),
+      password: password,
+      displayName: displayName,
+      avatar: avatarUrl,
+      hasCompletedProfile: false,
+    });
+
+    // Log the user in
+    req.login(user, (err) => {
+      if (err) {
+        console.error('Login error:', err);
+        req.flash('error', 'Account created but login failed. Please try logging in.');
+        return res.redirect('/');
+      }
+      res.redirect('/signup/address');
+    });
+  } catch (error) {
+    console.error('Signup error:', error);
+    req.flash('error', 'An error occurred during signup. Please try again.');
+    res.redirect('/');
+  }
+};
+
+// @desc    Login with email/password
+// @route   POST /auth/login
+exports.login = async (req, res, next) => {
+  const passport = require('passport');
+
+  passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      console.error('Login error:', err);
+      req.flash('error', 'An error occurred. Please try again.');
+      return res.redirect('/');
+    }
+
+    if (!user) {
+      req.flash('error', info.message || 'Invalid email or password');
+      return res.redirect('/#authModal');
+    }
+
+    req.login(user, (err) => {
+      if (err) {
+        console.error('Login error:', err);
+        req.flash('error', 'Login failed. Please try again.');
+        return res.redirect('/');
+      }
+
+      // Check if profile is complete
+      if (!user.hasCompletedProfile) {
+        return res.redirect('/signup/address');
+      }
+
+      req.flash('success', 'Welcome back!');
+      res.redirect('/neighborhood');
+    });
+  })(req, res, next);
 };
 
 // @desc    Logout user

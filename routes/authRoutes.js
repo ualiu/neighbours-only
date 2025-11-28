@@ -5,7 +5,13 @@ const authController = require('../controllers/authController');
 const { ensureGuest, ensureProfileIncomplete } = require('../middleware/auth');
 
 // @route   GET /
-router.get('/', ensureGuest, authController.showLanding);
+router.get('/', authController.showLanding);
+
+// @route   POST /auth/signup
+router.post('/auth/signup', authController.signup);
+
+// @route   POST /auth/login
+router.post('/auth/login', authController.login);
 
 // @route   GET /terms
 router.get('/terms', (req, res) => {

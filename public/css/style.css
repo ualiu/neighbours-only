@@ -53,7 +53,7 @@ div {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background-color: #fff !important;
+  background-color: #f8f4f0 !important;
 }
 
 .navbar .container-fluid {
@@ -163,7 +163,7 @@ div {
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: #fff;
+  background-color: #f8f4f0;
   border-top: 1px solid #e4e6eb;
   display: flex;
   justify-content: space-around;
@@ -392,6 +392,7 @@ div {
   border: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
+  background-color: #f8f4f0;
 }
 
 .card:hover {
@@ -659,9 +660,14 @@ div {
 }
 
 /* Form Styles */
+.form-control {
+  background-color: #f8f4f0;
+}
+
 .form-control:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  background-color: #f8f4f0;
 }
 
 /* Alert Styles */
@@ -670,10 +676,16 @@ div {
   border: none;
 }
 
+/* Modal Styles */
+.modal-content {
+  background-color: #f8f4f0;
+}
+
 /* Dropdown Menu */
 .dropdown-menu {
   border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: #f8f4f0;
 }
 
 /* Image Preview */
@@ -828,7 +840,7 @@ a.btn {
 }
 
 .add-comment-form input[type="text"]:focus {
-  background-color: #fff;
+  background-color: #f8f4f0;
   border-color: var(--primary-color);
 }
 
@@ -1005,7 +1017,7 @@ a.btn {
 }
 
 .search-input:focus {
-  background-color: #fff;
+  background-color: #f8f4f0;
   border: 1px solid var(--primary-color);
   box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
   outline: none;
@@ -1073,6 +1085,7 @@ a.btn {
   border-radius: 12px;
   border: none;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  background-color: #f8f4f0;
 }
 
 #searchModal .modal-header {
@@ -1627,13 +1640,13 @@ p,
 }
 
 .gm-style .gm-style-iw-t::after {
-  background: white !important;
+  background: #f8f4f0 !important;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Map Controls */
 .gm-style button {
-  background: white !important;
+  background: #f8f4f0 !important;
   border-radius: 8px !important;
 }
 
@@ -1669,7 +1682,7 @@ p,
 .gm-style img[src*="cloudinary.com"],
 .gm-style img[src*="lh3.googleusercontent.com"] {
   border-radius: 50% !important;
-  border: 3px solid white !important;
+  border: 3px solid #f8f4f0 !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
   object-fit: cover !important;
 }
@@ -1734,4 +1747,127 @@ img.rounded-circle,
   object-fit: cover !important;
   aspect-ratio: 1 / 1 !important;
   flex-shrink: 0 !important;
+}
+
+/* Auth Modal Styles */
+.auth-modal {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.auth-modal .modal-header {
+  padding: 1.5rem 1.5rem 1rem;
+  background-color: #f8f4f0;
+}
+
+.auth-modal .modal-body {
+  background-color: #f8f4f0;
+}
+
+.auth-modal .modal-title {
+  font-size: 1.5rem;
+  color: #222;
+}
+
+.auth-modal .form-label {
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.auth-modal .form-control-lg {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 2px solid #e4e6eb;
+  background-color: #fff;
+  transition: all 0.2s ease;
+}
+
+.auth-modal .form-control-lg:focus {
+  background-color: #fff;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+}
+
+.auth-modal .btn-lg {
+  padding: 0.875rem 1.5rem;
+  font-weight: 600;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.auth-modal .btn-primary {
+  background-color: var(--primary-color);
+  border: none;
+}
+
+.auth-modal .btn-primary:hover {
+  background-color: #0a58ca;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+}
+
+.auth-modal .btn-outline-dark {
+  border: 2px solid #222;
+  color: #222;
+  background-color: #fff;
+  font-weight: 600;
+}
+
+.auth-modal .btn-outline-dark:hover {
+  background-color: #222;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Divider */
+.divider {
+  position: relative;
+  text-align: center;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #e4e6eb;
+}
+
+.divider-text {
+  position: relative;
+  display: inline-block;
+  padding: 0 1rem;
+  background-color: #f8f4f0;
+  color: #65676b;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Mobile optimizations for auth modal */
+@media (max-width: 575px) {
+  .auth-modal .modal-title {
+    font-size: 1.25rem;
+  }
+
+  .auth-modal .modal-body {
+    padding: 1.5rem !important;
+  }
+
+  .auth-modal .form-control-lg {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.95rem;
+  }
+
+  .auth-modal .btn-lg {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+  }
 }

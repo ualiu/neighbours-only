@@ -1,6 +1,22 @@
 <%- include('partials/header') %>
 
-<div class="landing-page min-vh-100 d-flex align-items-center bg-light">
+<!-- Flash Messages -->
+<% if (typeof messages !== 'undefined' && messages) { %>
+  <% if (messages.success) { %>
+    <div class="alert alert-success alert-dismissible fade show m-3 position-fixed top-0 start-50 translate-middle-x" style="z-index: 9999; max-width: 500px;" role="alert">
+      <%= messages.success %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  <% } %>
+  <% if (messages.error) { %>
+    <div class="alert alert-danger alert-dismissible fade show m-3 position-fixed top-0 start-50 translate-middle-x" style="z-index: 9999; max-width: 500px;" role="alert">
+      <%= messages.error %>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  <% } %>
+<% } %>
+
+<div class="landing-page min-vh-100 d-flex align-items-center">
   <div class="container px-3 px-sm-4">
     <div class="row justify-content-center">
       <div class="col-lg-10 col-xl-8 text-center">
@@ -11,9 +27,9 @@
 
           <!-- CTA Button -->
           <div class="d-grid gap-3 d-sm-flex justify-content-sm-center mb-4 mb-md-5">
-            <a href="/auth/google" class="btn btn-primary btn-lg landing-cta-btn">
-              <i class="bi bi-google me-2"></i>Sign Up with Google
-            </a>
+            <button type="button" class="btn btn-primary btn-lg landing-cta-btn" data-bs-toggle="modal" data-bs-target="#authModal">
+              Get Started
+            </button>
           </div>
 
           <!-- Legal Links -->
@@ -65,5 +81,113 @@
     </div>
   </div>
 </div>
+
+<!-- Auth Modal -->
+<div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content auth-modal">
+      <div class="modal-header border-0">
+        <h5 class="modal-title w-100 text-center fw-bold" id="authModalLabel">
+          <span id="modalTitle">Join Your Neighbourhood</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <!-- Sign Up Form -->
+        <div id="signupForm">
+          <form action="/auth/signup" method="POST" id="signupFormElement">
+            <div class="mb-3">
+              <label for="signupName" class="form-label">Full Name</label>
+              <input type="text" class="form-control form-control-lg" id="signupName" name="displayName" placeholder="John Doe" required>
+            </div>
+            <div class="mb-3">
+              <label for="signupEmail" class="form-label">Email</label>
+              <input type="email" class="form-control form-control-lg" id="signupEmail" name="email" placeholder="john@example.com" required>
+            </div>
+            <div class="mb-3">
+              <label for="signupPassword" class="form-label">Password</label>
+              <input type="password" class="form-control form-control-lg" id="signupPassword" name="password" placeholder="Minimum 8 characters" minlength="8" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+              Create Account
+            </button>
+          </form>
+
+          <!-- Divider -->
+          <div class="divider my-4">
+            <span class="divider-text">or</span>
+          </div>
+
+          <!-- Google Sign Up -->
+          <a href="/auth/google" class="btn btn-outline-dark btn-lg w-100 mb-3">
+            <i class="bi bi-google me-2"></i>Continue with Google
+          </a>
+
+          <!-- Switch to Login -->
+          <p class="text-center text-muted mb-0 mt-4">
+            Already have an account? <a href="#" id="showLogin" class="text-primary fw-semibold text-decoration-none">Log in</a>
+          </p>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm" style="display: none;">
+          <form action="/auth/login" method="POST" id="loginFormElement">
+            <div class="mb-3">
+              <label for="loginEmail" class="form-label">Email</label>
+              <input type="email" class="form-control form-control-lg" id="loginEmail" name="email" placeholder="john@example.com" required>
+            </div>
+            <div class="mb-3">
+              <label for="loginPassword" class="form-label">Password</label>
+              <input type="password" class="form-control form-control-lg" id="loginPassword" name="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+              Log In
+            </button>
+          </form>
+
+          <!-- Divider -->
+          <div class="divider my-4">
+            <span class="divider-text">or</span>
+          </div>
+
+          <!-- Google Login -->
+          <a href="/auth/google" class="btn btn-outline-dark btn-lg w-100 mb-3">
+            <i class="bi bi-google me-2"></i>Continue with Google
+          </a>
+
+          <!-- Switch to Sign Up -->
+          <p class="text-center text-muted mb-0 mt-4">
+            Don't have an account? <a href="#" id="showSignup" class="text-primary fw-semibold text-decoration-none">Sign up</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toggle between sign up and login forms
+  document.getElementById('showLogin').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('signupForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('modalTitle').textContent = 'Welcome Back';
+  });
+
+  document.getElementById('showSignup').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('signupForm').style.display = 'block';
+    document.getElementById('modalTitle').textContent = 'Join Your Neighbourhood';
+  });
+
+  // Auto-open modal if hash is #authModal or if there are flash messages
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.location.hash === '#authModal' || document.querySelector('.alert')) {
+      const authModal = new bootstrap.Modal(document.getElementById('authModal'));
+      authModal.show();
+    }
+  });
+</script>
 
 <%- include('partials/footer') %>
