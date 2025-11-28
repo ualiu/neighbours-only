@@ -480,6 +480,10 @@ h1, h2, h3, h4, h5, h6, p, a, button, input, textarea, select, label, span, div 
         padding: 1.5rem 0;
     }
 
+    .hero-section {
+        margin-top: 3.5rem;
+    }
+
     .landing-title {
         font-size: 2.25rem;
     }
@@ -492,6 +496,10 @@ h1, h2, h3, h4, h5, h6, p, a, button, input, textarea, select, label, span, div 
         padding: 0.875rem 2rem;
         font-size: 1rem;
         min-width: 100%;
+    }
+
+    .features-section .row {
+        gap: 0.75rem !important;
     }
 
     .feature-icon {
@@ -567,7 +575,7 @@ h1, h2, h3, h4, h5, h6, p, a, button, input, textarea, select, label, span, div 
 /* Legal Links under CTA */
 .legal-links-small {
     font-size: 0.75rem;
-    margin-top: -1.5rem;
+    margin-top: -0.75rem;
 }
 
 .legal-links-small a {
