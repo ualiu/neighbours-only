@@ -42,12 +42,34 @@ exports.createPost = async (req, res) => {
 
     const imageUrl = req.file ? req.file.path : null;
 
-    // Step 1: Moderate the post with AI
-    const moderation = await moderationService.moderateNewPost(
-      text.trim(),
-      imageUrl,
-      req.user._id
-    );
+    // ==========================================
+    // AI MODERATION DISABLED
+    // ==========================================
+    // AI screening is turned off - posts publish immediately
+    // Moderation code kept intact for future re-enablement
+    // Reporting system still active via user reports
+    // ==========================================
+
+    // Step 1: DISABLED - Moderate the post with AI
+    // const moderation = await moderationService.moderateNewPost(
+    //   text.trim(),
+    //   imageUrl,
+    //   req.user._id
+    // );
+
+    // Default moderation result (auto-approve all posts)
+    const moderation = {
+      status: 'approved',
+      decision: 'allow',
+      lane: 'green',
+      reason: 'Auto-approved (AI moderation disabled)',
+      confidence: 100,
+      categories: [],
+      isVisible: true,
+      needsRevision: false,
+      revisionSuggestion: null,
+      businessDetection: null,
+    };
 
     // Step 2: Create post with moderation result
     const post = new Post({
@@ -73,31 +95,31 @@ exports.createPost = async (req, res) => {
 
     await post.save();
 
-    // Step 3: Handle different moderation lanes
+    // Step 3: Handle different moderation lanes (currently always green)
 
-    // 🔴 RED LANE - Blocked
-    if (moderation.lane === 'red' || moderation.decision === 'block') {
-      req.flash(
-        'error',
-        `Post not allowed: ${moderation.userMessage || moderation.reason}`
-      );
-      if (moderation.revisionSuggestion) {
-        req.flash('info', `Suggestion: ${moderation.revisionSuggestion}`);
-      }
-      return res.redirect('/posts/new');
-    }
+    // 🔴 RED LANE - Blocked (DISABLED)
+    // if (moderation.lane === 'red' || moderation.decision === 'block') {
+    //   req.flash(
+    //     'error',
+    //     `Post not allowed: ${moderation.userMessage || moderation.reason}`
+    //   );
+    //   if (moderation.revisionSuggestion) {
+    //     req.flash('info', `Suggestion: ${moderation.revisionSuggestion}`);
+    //   }
+    //   return res.redirect('/posts/new');
+    // }
 
-    // 🟡 YELLOW LANE - Flagged for review
-    if (moderation.lane === 'yellow' || moderation.decision === 'flag') {
-      req.flash(
-        'warning',
-        'Your post is under review. We\'ll notify you when it\'s approved.'
-      );
-      req.flash('info', `Reason: ${moderation.reason}`);
-      return res.redirect('/neighborhood');
-    }
+    // 🟡 YELLOW LANE - Flagged for review (DISABLED)
+    // if (moderation.lane === 'yellow' || moderation.decision === 'flag') {
+    //   req.flash(
+    //     'warning',
+    //     'Your post is under review. We\'ll notify you when it\'s approved.'
+    //   );
+    //   req.flash('info', `Reason: ${moderation.reason}`);
+    //   return res.redirect('/neighborhood');
+    // }
 
-    // 🟢 GREEN LANE - Approved and visible
+    // 🟢 GREEN LANE - All posts auto-approved
     req.flash('success', 'Post created successfully!');
     res.redirect('/neighborhood');
   } catch (error) {

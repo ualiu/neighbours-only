@@ -95,6 +95,7 @@ exports.searchPosts = async (req, res) => {
       // Search posts by text content
       posts = await Post.find({
         neighborhoodId: req.user.neighborhoodId,
+        isVisible: true, // Only show visible posts
         text: { $regex: query, $options: 'i' } // Case-insensitive search
       })
         .populate('userId', 'displayName avatar')

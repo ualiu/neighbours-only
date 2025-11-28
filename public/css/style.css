@@ -568,15 +568,15 @@ div {
   }
 
   .feature-icon {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
 
   .feature-title {
-    font-size: 1.125rem;
+    font-size: 1rem;
   }
 
   .feature-text {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
 }
 
@@ -604,15 +604,15 @@ div {
   }
 
   .feature-icon {
-    font-size: 2.25rem;
+    font-size: 1.85rem;
   }
 
   .feature-title {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 
   .feature-text {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
 }
 
