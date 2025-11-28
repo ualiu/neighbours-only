@@ -42,6 +42,12 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    settings: {
+      showAddress: {
+        type: Boolean,
+        default: true,
+      },
+    },
   },
   {
     timestamps: true,

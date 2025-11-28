@@ -14,8 +14,11 @@ exports.showFeed = async (req, res) => {
       return res.redirect('/');
     }
 
-    // Get all posts from this neighborhood with user details
-    const posts = await Post.find({ neighborhoodId: req.user.neighborhoodId })
+    // Get all visible posts from this neighborhood with user details
+    const posts = await Post.find({
+      neighborhoodId: req.user.neighborhoodId,
+      isVisible: true, // Only show approved posts
+    })
       .populate('userId', 'displayName avatar')
       .sort({ createdAt: -1 });
 

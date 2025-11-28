@@ -1,6 +1,7 @@
 const Post = require('../models/Post');
 const Neighborhood = require('../models/Neighborhood');
 const { cloudinary } = require('../config/cloudinary');
+const moderationService = require('../services/moderationService');
 
 // @desc    Show create post form
 // @route   GET /posts/new
@@ -22,6 +23,10 @@ exports.showCreateForm = async (req, res) => {
 // @desc    Create a new post
 // @route   POST /posts/create
 exports.createPost = async (req, res) => {
+  console.log('\n🚀 ===== POST CREATION STARTED =====');
+  console.log('Request body:', req.body);
+  console.log('User:', req.user?.displayName);
+
   try {
     const { text } = req.body;
 
@@ -35,20 +40,64 @@ exports.createPost = async (req, res) => {
       return res.redirect('/posts/new');
     }
 
-    const postData = {
+    const imageUrl = req.file ? req.file.path : null;
+
+    // Step 1: Moderate the post with AI
+    const moderation = await moderationService.moderateNewPost(
+      text.trim(),
+      imageUrl,
+      req.user._id
+    );
+
+    // Step 2: Create post with moderation result
+    const post = new Post({
       userId: req.user._id,
       neighborhoodId: req.user.neighborhoodId,
       text: text.trim(),
-    };
+      imageUrl,
+      imagePublicId: req.file?.filename,
+      moderation: {
+        status: moderation.status,
+        checkedAt: new Date(),
+        aiDecision: moderation.decision,
+        aiReason: moderation.reason,
+        aiConfidence: moderation.confidence,
+        categories: moderation.categories,
+        lane: moderation.lane,
+      },
+      isVisible: moderation.isVisible,
+      needsRevision: moderation.needsRevision,
+      revisionSuggestion: moderation.revisionSuggestion,
+      businessDetection: moderation.businessDetection,
+    });
 
-    // If image was uploaded
-    if (req.file) {
-      postData.imageUrl = req.file.path;
-      postData.imagePublicId = req.file.filename;
+    await post.save();
+
+    // Step 3: Handle different moderation lanes
+
+    // 🔴 RED LANE - Blocked
+    if (moderation.lane === 'red' || moderation.decision === 'block') {
+      req.flash(
+        'error',
+        `Post not allowed: ${moderation.userMessage || moderation.reason}`
+      );
+      if (moderation.revisionSuggestion) {
+        req.flash('info', `Suggestion: ${moderation.revisionSuggestion}`);
+      }
+      return res.redirect('/posts/new');
     }
 
-    await Post.create(postData);
+    // 🟡 YELLOW LANE - Flagged for review
+    if (moderation.lane === 'yellow' || moderation.decision === 'flag') {
+      req.flash(
+        'warning',
+        'Your post is under review. We\'ll notify you when it\'s approved.'
+      );
+      req.flash('info', `Reason: ${moderation.reason}`);
+      return res.redirect('/neighborhood');
+    }
 
+    // 🟢 GREEN LANE - Approved and visible
     req.flash('success', 'Post created successfully!');
     res.redirect('/neighborhood');
   } catch (error) {

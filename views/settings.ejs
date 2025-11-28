@@ -1,0 +1,189 @@
+<%- include('partials/header') %> <%- include('partials/nav') %>
+
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <!-- Page Header -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="card-title mb-2">
+            <i class="bi bi-gear-fill"></i>
+            Account Settings
+          </h2>
+          <p class="text-muted mb-0">Manage your account preferences</p>
+        </div>
+      </div>
+
+      <!-- Profile Information -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-3">
+            <i class="bi bi-person-circle"></i>
+            Profile Information
+          </h5>
+          <div class="d-flex align-items-center mb-3">
+            <img
+              src="<%= user.avatar %>"
+              alt="<%= user.displayName %>"
+              class="rounded-circle me-3"
+              width="60"
+              height="60"
+            />
+            <div>
+              <h6 class="mb-0"><%= user.displayName %></h6>
+              <p class="text-muted mb-0 small"><%= user.email %></p>
+            </div>
+          </div>
+          <% if (user.address && user.address.formatted) { %>
+          <p class="mb-0">
+            <i class="bi bi-geo-alt-fill text-primary"></i>
+            <small class="text-muted"><%= user.address.formatted %></small>
+          </p>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Privacy Settings -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-3">
+            <i class="bi bi-shield-lock-fill"></i>
+            Privacy Settings
+          </h5>
+          <form action="/settings/update" method="POST" id="settingsForm">
+            <div class="form-check form-switch mb-3">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="showAddress"
+                name="showAddress"
+                <%= user.settings?.showAddress !== false ? 'checked' : '' %>
+              >
+              <label class="form-check-label" for="showAddress">
+                <strong>Show street name on your members card</strong>
+                <br />
+                <small class="text-muted">
+                  Other neighbors will be able to see your street name on the
+                  members page. Your full address is never shown.
+                </small>
+              </label>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="card border-danger mb-4">
+        <div class="card-body">
+          <h5 class="card-title text-danger mb-3">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            Danger Zone
+          </h5>
+          <p class="text-muted mb-3">
+            Once you delete your account, there is no going back. This will
+            permanently delete:
+          </p>
+          <ul class="text-muted mb-3">
+            <li>Your profile and account information</li>
+            <li>All your posts and comments</li>
+            <li>Your neighborhood membership</li>
+          </ul>
+          <button
+            type="button"
+            class="btn btn-outline-danger"
+            data-bs-toggle="modal"
+            data-bs-target="#deleteAccountModal"
+          >
+            <i class="bi bi-trash-fill"></i> Delete Account
+          </button>
+        </div>
+      </div>
+
+      <!-- Back to Neighborhood -->
+      <div class="text-center mb-4">
+        <a href="/neighborhood" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left"></i> Back to Feed
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Account Confirmation Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title text-danger">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          Delete Account
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p class="fw-semibold">Are you absolutely sure?</p>
+        <p class="text-muted">
+          This action <strong>cannot be undone</strong>. This will permanently
+          delete your account, all your posts, and remove you from your
+          neighborhood.
+        </p>
+        <div class="alert alert-danger">
+          <i class="bi bi-shield-x"></i>
+          <strong>Warning:</strong> This action is irreversible!
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <form action="/settings/delete-account" method="POST" class="d-inline">
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash-fill"></i> Yes, Delete My Account
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast for settings saved -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+  <div id="settingsSavedToast" class="toast align-items-center text-white bg-success border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body">
+        <i class="bi bi-check-circle-fill"></i> Settings saved successfully
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Auto-save settings when toggle is switched
+document.getElementById('showAddress').addEventListener('change', function() {
+  const form = document.getElementById('settingsForm');
+  const formData = new FormData(form);
+
+  // Submit form via fetch
+  fetch('/settings/update', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => {
+    if (response.ok) {
+      // Show success toast
+      const toast = new bootstrap.Toast(document.getElementById('settingsSavedToast'));
+      toast.show();
+    }
+  })
+  .catch(error => {
+    console.error('Error saving settings:', error);
+  });
+});
+</script>
+
+<%- include('partials/footer') %>

@@ -1,10 +1,37 @@
 /* Global Styles */
 :root {
-  --primary-color: #0d6efd;
+  --primary-color: #0c0c18;
   --secondary-color: #6c757d;
   --success-color: #198754;
   --danger-color: #dc3545;
   --light-bg: #f8f4f0;
+  --bs-primary: #0c0c18;
+  --bs-primary-rgb: 12, 12, 24;
+}
+
+/* Override Bootstrap primary colors */
+.text-primary {
+  color: #0c0c18 !important;
+}
+
+.bg-primary {
+  background-color: #0c0c18 !important;
+}
+
+.btn-primary {
+  background-color: #0c0c18 !important;
+  border-color: #0c0c18 !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: #1a1a2e !important;
+  border-color: #1a1a2e !important;
+}
+
+.border-primary {
+  border-color: #0c0c18 !important;
 }
 
 body {
@@ -392,7 +419,7 @@ div {
   border: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
-  background-color: #f8f4f0;
+  background-color: #ffffff;
 }
 
 .card:hover {
@@ -406,6 +433,24 @@ div {
 
 .post-card img {
   border-radius: 8px;
+}
+
+/* Post Footer - AI Badge & Concern Button */
+.post-footer {
+  padding-top: 8px;
+  margin-top: 12px;
+  border-top: 1px solid #e4e6eb !important;
+}
+
+.post-footer .concern-btn {
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.post-footer .concern-btn:hover {
+  text-decoration: none;
+  opacity: 0.8;
 }
 
 /* Avatar Styles */
@@ -459,14 +504,14 @@ div {
   padding: 1rem 2.5rem;
   font-size: 1.125rem;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+  box-shadow: 0 4px 12px rgba(12, 12, 24, 0.2);
   transition: all 0.3s ease;
   min-width: 280px;
 }
 
 .landing-cta-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3);
+  box-shadow: 0 6px 20px rgba(12, 12, 24, 0.3);
 }
 
 .landing-cta-btn i {
@@ -661,13 +706,13 @@ div {
 
 /* Form Styles */
 .form-control {
-  background-color: #f8f4f0;
+  background-color: #ffffff;
 }
 
 .form-control:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-  background-color: #f8f4f0;
+  box-shadow: 0 0 0 0.2rem rgba(12, 12, 24, 0.25);
+  background-color: #ffffff;
 }
 
 /* Alert Styles */
@@ -678,14 +723,14 @@ div {
 
 /* Modal Styles */
 .modal-content {
-  background-color: #f8f4f0;
+  background-color: #ffffff;
 }
 
 /* Dropdown Menu */
 .dropdown-menu {
   border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  background-color: #f8f4f0;
+  background-color: #ffffff;
 }
 
 /* Image Preview */
@@ -1019,7 +1064,7 @@ a.btn {
 .search-input:focus {
   background-color: #f8f4f0;
   border: 1px solid var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+  box-shadow: 0 0 0 3px rgba(12, 12, 24, 0.1);
   outline: none;
 }
 
@@ -1063,7 +1108,7 @@ a.btn {
 
 .search-input-large:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+  box-shadow: 0 0 0 3px rgba(12, 12, 24, 0.1);
   outline: none;
 }
 
@@ -1127,7 +1172,7 @@ a.btn {
 
 .search-modal-input:focus {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+  box-shadow: 0 0 0 4px rgba(12, 12, 24, 0.1);
   outline: none;
 }
 
@@ -1384,7 +1429,7 @@ p,
 
 /* Neighbours Header Card */
 .card.bg-primary.text-white {
-  background: linear-gradient(135deg, var(--primary-color) 0%, #0a58ca 100%);
+  background: linear-gradient(135deg, var(--primary-color) 0%, #1a1a2e 100%);
   border: none;
   border-radius: 12px;
 }
@@ -1673,7 +1718,7 @@ p,
 
 .neighbour-info-window .badge {
   font-size: 11px;
-  color: #0d6efd;
+  color: #0c0c18;
   font-weight: 500;
 }
 
@@ -1734,7 +1779,7 @@ p,
 
 .neighbour-card.active {
   border: 2px solid var(--primary-color);
-  box-shadow: 0 8px 24px rgba(13, 110, 253, 0.25);
+  box-shadow: 0 8px 24px rgba(12, 12, 24, 0.25);
 }
 
 /* Global Avatar Fix - Ensure Perfect Circles Everywhere */
@@ -1747,6 +1792,43 @@ img.rounded-circle,
   object-fit: cover !important;
   aspect-ratio: 1 / 1 !important;
   flex-shrink: 0 !important;
+}
+
+/* AI Verified Badge */
+.ai-verified-badge {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  cursor: help;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.ai-verified-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.ai-verified-badge i {
+  font-size: 0.75rem;
+}
+
+/* Mobile optimization for AI badge */
+@media (max-width: 575px) {
+  .ai-verified-badge {
+    font-size: 0.6rem;
+    padding: 2px 6px;
+  }
+
+  .ai-verified-badge i {
+    font-size: 0.7rem;
+  }
 }
 
 /* Auth Modal Styles */
@@ -1789,7 +1871,7 @@ img.rounded-circle,
 .auth-modal .form-control-lg:focus {
   background-color: #fff;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+  box-shadow: 0 0 0 4px rgba(12, 12, 24, 0.1);
 }
 
 .auth-modal .btn-lg {
@@ -1806,9 +1888,9 @@ img.rounded-circle,
 }
 
 .auth-modal .btn-primary:hover {
-  background-color: #0a58ca;
+  background-color: #1a1a2e;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+  box-shadow: 0 4px 12px rgba(12, 12, 24, 0.3);
 }
 
 .auth-modal .btn-outline-dark {

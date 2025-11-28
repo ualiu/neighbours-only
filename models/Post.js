@@ -27,6 +27,39 @@ const postSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    moderation: {
+      status: {
+        type: String,
+        enum: ['pending', 'approved', 'flagged', 'rejected', 'needs_revision'],
+        default: 'pending',
+      },
+      checkedAt: Date,
+      aiDecision: String,
+      aiReason: String,
+      aiConfidence: Number,
+      categories: [String],
+      lane: String,
+    },
+    isVisible: {
+      type: Boolean,
+      default: false,
+    },
+    needsRevision: {
+      type: Boolean,
+      default: false,
+    },
+    revisionSuggestion: String,
+    reportCount: {
+      type: Number,
+      default: 0,
+    },
+    businessDetection: {
+      isOutsideBusiness: Boolean,
+      isNeighborMicroEntrepreneur: Boolean,
+      postFrequency: Number,
+      hasCommercialLinks: Boolean,
+      promotionalScore: Number,
+    },
   },
   {
     timestamps: true,

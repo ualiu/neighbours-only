@@ -186,3 +186,152 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// ========== AI MODERATION - CONCERN REPORTING SYSTEM ==========
+
+// Handle "Send Concern" button clicks
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.concern-btn')) {
+        const postId = e.target.closest('.concern-btn').dataset.postId;
+        document.getElementById('concernPostId').value = postId;
+        const modal = new bootstrap.Modal(document.getElementById('concernModal'));
+        modal.show();
+    }
+});
+
+// Handle concern form submission
+document.addEventListener('DOMContentLoaded', function() {
+    const concernForm = document.getElementById('concernForm');
+
+    if (!concernForm) return;
+
+    concernForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const postId = document.getElementById('concernPostId').value;
+        const formData = new FormData(e.target);
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+
+        // Disable button and show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending...';
+
+        try {
+            const response = await fetch(`/api/posts/${postId}/concern`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    reason: formData.get('reason'),
+                    details: formData.get('details')
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                // Show success message
+                let message = result.message;
+                if (result.willReanalyze) {
+                    message += ` (${result.reportCount} neighbors have flagged this post)`;
+                }
+
+                showToast('success', message);
+
+                // Close modal and reset form
+                bootstrap.Modal.getInstance(document.getElementById('concernModal')).hide();
+                e.target.reset();
+
+                // Optional: Fade out the post if it was hidden after re-analysis
+                if (result.willReanalyze) {
+                    const postElement = document.querySelector(`[data-post-id="${postId}"]`)?.closest('.post-card');
+                    if (postElement) {
+                        postElement.style.opacity = '0.5';
+                        postElement.style.pointerEvents = 'none';
+                    }
+                }
+            } else {
+                showToast('error', result.message || 'Failed to submit concern');
+            }
+
+        } catch (error) {
+            console.error('Concern submission error:', error);
+            showToast('error', 'Failed to submit concern. Please try again.');
+        } finally {
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
+    });
+});
+
+// Toast notification function
+function showToast(type, message) {
+    const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">${message}</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+    toastContainer.appendChild(toast);
+    const bsToast = new bootstrap.Toast(toast, { delay: 5000 });
+    bsToast.show();
+    toast.addEventListener('hidden.bs.toast', function() {
+        toast.remove();
+    });
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+    container.style.zIndex = '9999';
+    document.body.appendChild(container);
+    return container;
+}
+
+// ========== TIME AGO FUNCTIONALITY (Facebook-style) ==========
+
+// Time ago formatting function
+function timeAgo(timestamp) {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const weeks = Math.floor(days / 7);
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
+
+    if (seconds < 30) return 'just now';
+    if (seconds < 60) return `${seconds}s ago`;
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+    if (weeks < 4) return `${weeks}w ago`;
+    if (months < 12) return `${months}mo ago`;
+    return `${years}y ago`;
+}
+
+// Update all post timestamps
+function updateTimestamps() {
+    document.querySelectorAll('.post-timestamp').forEach(el => {
+        const timestamp = parseInt(el.dataset.timestamp);
+        if (timestamp) {
+            el.textContent = timeAgo(timestamp);
+        }
+    });
+}
+
+// Update on page load and every minute
+document.addEventListener('DOMContentLoaded', () => {
+    updateTimestamps();
+    setInterval(updateTimestamps, 60000); // Update every minute
+});

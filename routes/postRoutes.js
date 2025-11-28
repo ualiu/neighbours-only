@@ -10,6 +10,10 @@ router.get('/new', ensureProfileComplete, postController.showCreateForm);
 // @route   POST /posts/create
 router.post(
   '/create',
+  (req, res, next) => {
+    console.log('\n📍 ROUTE HIT: POST /posts/create');
+    next();
+  },
   ensureProfileComplete,
   upload.single('image'),
   postController.createPost

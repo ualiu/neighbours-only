@@ -16,6 +16,12 @@ connectDB();
 // Passport config
 require('./config/passport')(passport);
 
+// Request logging middleware - LOG ALL REQUESTS
+app.use((req, res, next) => {
+  console.log(`\n🌐 ${req.method} ${req.url}`);
+  next();
+});
+
 // Body parser middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -61,6 +67,8 @@ app.use('/', require('./routes/authRoutes'));
 app.use('/neighborhood', require('./routes/neighborhoodRoutes'));
 app.use('/posts', require('./routes/postRoutes'));
 app.use('/comments', require('./routes/commentRoutes'));
+app.use('/api', require('./routes/reportRoutes'));
+app.use('/settings', require('./routes/settingsRoutes'));
 
 // 404 Handler
 app.use((req, res) => {
