@@ -4,7 +4,10 @@
       "Bash(npm install:*)",
       "Bash(npm audit:*)",
       "Bash(npm start)",
-      "WebFetch(domain:thrift-addict-production.up.railway.app)"
+      "WebFetch(domain:thrift-addict-production.up.railway.app)",
+      "Bash(dir \"C:\\Users\\Urim Aliu\\Desktop\\fun-projects\\super-karen\" /s /b)",
+      "Bash(find:*)",
+      "Bash(git -C \"/c/Users/Urim Aliu/Desktop/fun-projects/super-karen\" log --oneline)"
     ],
     "deny": [],
     "ask": []
