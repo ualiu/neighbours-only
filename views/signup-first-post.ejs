@@ -1,0 +1,90 @@
+<%- include('partials/header') %>
+
+<div class="container mt-3 mt-md-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-body p-3 p-sm-4 p-md-5">
+                    <h2 class="card-title text-center mb-3">Introduce Yourself</h2>
+                    <p class="text-center text-muted mb-2">
+                        Welcome to <%= neighborhood.name %>!
+                    </p>
+                    <p class="text-center text-muted small mb-4">
+                        Create your first post to join the community
+                    </p>
+
+                    <% if (typeof messages !== 'undefined' && messages) { %>
+                        <% if (messages.error) { %>
+                            <div class="alert alert-danger" role="alert">
+                                <%= messages.error %>
+                            </div>
+                        <% } %>
+                    <% } %>
+
+                    <form action="/signup/create-first-post" method="POST" enctype="multipart/form-data" id="firstPostForm">
+                        <div class="mb-4">
+                            <label for="text" class="form-label">Your First Post</label>
+                            <textarea
+                                name="text"
+                                class="form-control form-control-lg"
+                                id="postText"
+                                rows="4"
+                                maxlength="2000"
+                                placeholder="Introduce yourself, ask for recommendations, or share what you love about the neighborhood..."
+                                required
+                                autofocus
+                            ></textarea>
+                            <div class="form-text d-flex justify-content-between">
+                                <span>Share something to get started</span>
+                                <span class="text-muted"><span id="charCount">0</span>/2000</span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" disabled>
+                                Post & Continue
+                            </button>
+                            <button type="button" class="btn btn-link text-muted small" onclick="skipFirstPost()">
+                                Skip for now
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Character counter
+const postText = document.getElementById('postText');
+const charCount = document.getElementById('charCount');
+const submitBtn = document.getElementById('submitBtn');
+
+postText.addEventListener('input', function() {
+    const count = this.value.length;
+    charCount.textContent = count;
+
+    // Enable submit button if text is not empty
+    if (count > 0 && count <= 2000) {
+        submitBtn.disabled = false;
+    } else {
+        submitBtn.disabled = true;
+    }
+});
+
+// Skip function
+function skipFirstPost() {
+    if (confirm('Skip creating your first post? You can always post later.')) {
+        window.location.href = '/signup/skip-first-post';
+    }
+}
+
+// Prevent double submission
+document.getElementById('firstPostForm').addEventListener('submit', function() {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Posting...';
+});
+</script>
+
+<%- include('partials/footer') %>

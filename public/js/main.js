@@ -1,8 +1,8 @@
 // Main JavaScript file for client-side functionality
 
-// Auto-dismiss alerts after 5 seconds
+// Auto-dismiss flash message alerts after 5 seconds (but not persistent alerts)
 document.addEventListener('DOMContentLoaded', function() {
-    const alerts = document.querySelectorAll('.alert');
+    const alerts = document.querySelectorAll('.alert.alert-dismissible');
 
     alerts.forEach(function(alert) {
         setTimeout(function() {

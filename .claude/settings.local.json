@@ -17,7 +17,9 @@
       "Bash(netstat:*)",
       "Bash(findstr:*)",
       "Bash(taskkill:*)",
-      "Bash(cmd //c taskkill //PID 28940 //F)"
+      "Bash(cmd //c taskkill //PID 28940 //F)",
+      "WebFetch(domain:andrewchen.com)",
+      "Bash(node fix-membercount.js:*)"
     ],
     "deny": [],
     "ask": []

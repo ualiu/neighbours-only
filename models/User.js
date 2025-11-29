@@ -42,6 +42,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    hasCreatedFirstPost: {
+      type: Boolean,
+      default: false,
+    },
     settings: {
       showAddress: {
         type: Boolean,

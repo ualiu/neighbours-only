@@ -210,8 +210,8 @@ exports.completeProfile = async (req, res) => {
 
     await req.user.save();
 
-    req.flash('success', `Welcome to ${neighborhood.name}!`);
-    res.redirect('/neighborhood');
+    // Redirect to first post creation instead of neighborhood
+    res.redirect('/signup/first-post');
   } catch (error) {
     console.error('Error completing profile:', error);
     req.flash('error', 'An error occurred. Please try again.');
@@ -301,10 +301,103 @@ exports.login = async (req, res, next) => {
         return res.redirect('/signup/address');
       }
 
+      // Check if user needs to create first post
+      if (!user.hasCreatedFirstPost) {
+        return res.redirect('/signup/first-post');
+      }
+
       req.flash('success', 'Welcome back!');
       res.redirect('/neighborhood');
     });
   })(req, res, next);
+};
+
+// @desc    Show first post creation page
+// @route   GET /signup/first-post
+exports.showFirstPostForm = async (req, res) => {
+  try {
+    const neighborhood = await Neighborhood.findById(req.user.neighborhoodId);
+
+    res.render('signup-first-post', {
+      user: req.user,
+      neighborhood,
+    });
+  } catch (error) {
+    console.error('Error loading first post form:', error);
+    req.flash('error', 'Unable to load form');
+    res.redirect('/neighborhood');
+  }
+};
+
+// @desc    Create first post and complete onboarding
+// @route   POST /signup/create-first-post
+exports.createFirstPost = async (req, res) => {
+  const Post = require('../models/Post');
+
+  try {
+    const { text } = req.body;
+
+    if (!text || text.trim().length === 0) {
+      req.flash('error', 'Post text is required');
+      return res.redirect('/signup/first-post');
+    }
+
+    if (text.length > 2000) {
+      req.flash('error', 'Post text must be 2000 characters or less');
+      return res.redirect('/signup/first-post');
+    }
+
+    const imageUrl = req.file ? req.file.path : null;
+
+    // Create the first post (auto-approved, no moderation for first post)
+    const post = new Post({
+      userId: req.user._id,
+      neighborhoodId: req.user.neighborhoodId,
+      text: text.trim(),
+      imageUrl,
+      imagePublicId: req.file?.filename,
+      moderation: {
+        status: 'approved',
+        checkedAt: new Date(),
+        aiDecision: 'allow',
+        aiReason: 'First post auto-approved',
+        aiConfidence: 100,
+        lane: 'green',
+      },
+      isVisible: true,
+    });
+
+    await post.save();
+
+    // Mark user as having created first post
+    req.user.hasCreatedFirstPost = true;
+    await req.user.save();
+
+    const neighborhood = await Neighborhood.findById(req.user.neighborhoodId);
+    req.flash('success', `🎉 Welcome to ${neighborhood.name}! Your first post is live.`);
+    res.redirect('/neighborhood');
+  } catch (error) {
+    console.error('Error creating first post:', error);
+    req.flash('error', 'Unable to create post. Please try again.');
+    res.redirect('/signup/first-post');
+  }
+};
+
+// @desc    Skip first post (discouraged)
+// @route   GET /signup/skip-first-post
+exports.skipFirstPost = async (req, res) => {
+  try {
+    // Allow skipping but mark as completed anyway
+    req.user.hasCreatedFirstPost = true;
+    await req.user.save();
+
+    const neighborhood = await Neighborhood.findById(req.user.neighborhoodId);
+    req.flash('warning', `Welcome to ${neighborhood.name}! Don't forget to introduce yourself when you're ready.`);
+    res.redirect('/neighborhood');
+  } catch (error) {
+    console.error('Error skipping first post:', error);
+    res.redirect('/neighborhood');
+  }
 };
 
 // @desc    Logout user

@@ -16,12 +16,16 @@ const ensureGuest = (req, res, next) => {
 
 // Middleware to check if user has completed their profile
 const ensureProfileComplete = (req, res, next) => {
-  if (req.isAuthenticated() && req.user.hasCompletedProfile) {
+  if (req.isAuthenticated() && req.user.hasCompletedProfile && req.user.hasCreatedFirstPost) {
     return next();
   }
 
   if (req.isAuthenticated() && !req.user.hasCompletedProfile) {
     return res.redirect('/signup/address');
+  }
+
+  if (req.isAuthenticated() && req.user.hasCompletedProfile && !req.user.hasCreatedFirstPost) {
+    return res.redirect('/signup/first-post');
   }
 
   res.redirect('/');
@@ -40,9 +44,23 @@ const ensureProfileIncomplete = (req, res, next) => {
   res.redirect('/');
 };
 
+// Middleware to check if user needs to create first post
+const ensureFirstPostIncomplete = (req, res, next) => {
+  if (req.isAuthenticated() && req.user.hasCompletedProfile && !req.user.hasCreatedFirstPost) {
+    return next();
+  }
+
+  if (req.isAuthenticated() && req.user.hasCompletedProfile && req.user.hasCreatedFirstPost) {
+    return res.redirect('/neighborhood');
+  }
+
+  res.redirect('/');
+};
+
 module.exports = {
   ensureAuth,
   ensureGuest,
   ensureProfileComplete,
   ensureProfileIncomplete,
+  ensureFirstPostIncomplete,
 };

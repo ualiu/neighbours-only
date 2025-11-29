@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const authController = require('../controllers/authController');
-const { ensureGuest, ensureProfileIncomplete } = require('../middleware/auth');
+const { ensureGuest, ensureProfileIncomplete, ensureFirstPostIncomplete } = require('../middleware/auth');
+const { upload } = require('../config/cloudinary');
 
 // @route   GET /
 router.get('/', authController.showLanding);
@@ -42,6 +43,10 @@ router.get(
     if (!req.user.hasCompletedProfile) {
       return res.redirect('/signup/address');
     }
+    // Check if user needs to create first post
+    if (!req.user.hasCreatedFirstPost) {
+      return res.redirect('/signup/first-post');
+    }
     res.redirect('/neighborhood');
   }
 );
@@ -51,6 +56,15 @@ router.get('/signup/address', ensureProfileIncomplete, authController.showAddres
 
 // @route   POST /signup/complete-profile
 router.post('/signup/complete-profile', ensureProfileIncomplete, authController.completeProfile);
+
+// @route   GET /signup/first-post
+router.get('/signup/first-post', ensureFirstPostIncomplete, authController.showFirstPostForm);
+
+// @route   POST /signup/create-first-post
+router.post('/signup/create-first-post', ensureFirstPostIncomplete, upload.single('image'), authController.createFirstPost);
+
+// @route   GET /signup/skip-first-post
+router.get('/signup/skip-first-post', ensureFirstPostIncomplete, authController.skipFirstPost);
 
 // @route   GET /auth/logout
 router.get('/auth/logout', authController.logout);

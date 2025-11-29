@@ -72,14 +72,24 @@
                 </form>
             </div>
 
+            <!-- First user growth prompt (shows when only 1 member) -->
+            <% if (neighborhood.memberCount === 1) { %>
+                <div class="alert alert-info border-0 mb-3">
+                    <strong>💡 Help grow the community!</strong>
+                    <p class="mb-2 small">Share NeighboursOnly.com in your local Facebook neighborhood group so more neighbors can join.</p>
+                    <button class="btn btn-sm btn-primary" onclick="copyInviteLink()">
+                        <i class="bi bi-link-45deg"></i> Copy Invite Link
+                    </button>
+                </div>
+            <% } %>
+
             <!-- Posts Feed -->
             <% if (posts.length === 0) { %>
                 <div class="card">
                     <div class="card-body text-center py-5">
                         <i class="bi bi-chat-left-dots text-muted" style="font-size: 4rem;"></i>
                         <h4 class="mt-3">No posts yet</h4>
-                        <p class="text-muted">Be the first to share something with your neighborhood!</p>
-                        <a href="/posts/new" class="btn btn-primary mt-2">Create First Post</a>
+                        <p class="text-muted mb-4">Be the first to share something with your neighborhood</p>
                     </div>
                 </div>
             <% } else { %>
@@ -293,5 +303,29 @@
 
 <!-- Toast container for notifications -->
 <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+
+<script>
+// Copy invite link for first user
+function copyInviteLink() {
+    const inviteLink = window.location.origin;
+
+    navigator.clipboard.writeText(inviteLink).then(() => {
+        // Show success feedback
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check-circle"></i> Copied!';
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-success');
+
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-primary');
+        }, 2000);
+    }).catch(err => {
+        alert('Failed to copy link. Please copy manually: ' + inviteLink);
+    });
+}
+</script>
 
 <%- include('partials/footer') %>
