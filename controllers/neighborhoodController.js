@@ -60,15 +60,29 @@ exports.showNeighbours = async (req, res) => {
       return res.redirect('/');
     }
 
-    // Get all neighbours from this neighborhood
-    const neighbours = await User.find({ neighborhoodId: req.user.neighborhoodId })
-      .select('displayName avatar createdAt address settings')
-      .sort({ createdAt: -1 });
+    // Get ONLY online neighbours (active in last 5 minutes who have showOnlineStatus enabled)
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+    const onlineNeighbours = await User.find({
+      neighborhoodId: req.user.neighborhoodId,
+      lastActive: { $gte: fiveMinutesAgo },
+      'settings.showOnlineStatus': true
+    })
+      .select('displayName avatar createdAt address settings lastActive')
+      .sort({ lastActive: -1 });
+
+    // Get total member count for display
+    const totalMembers = await User.countDocuments({
+      neighborhoodId: req.user.neighborhoodId,
+      hasCompletedProfile: true
+    });
 
     res.render('members', {
       user: req.user,
       neighborhood,
-      neighbours,
+      neighbours: onlineNeighbours,
+      onlineCount: onlineNeighbours.length,
+      totalMembers
     });
   } catch (error) {
     console.error('Error loading neighbours:', error);

@@ -9,7 +9,8 @@
       "Bash(find:*)",
       "Bash(git -C \"/c/Users/Urim Aliu/Desktop/fun-projects/super-karen\" log --oneline)",
       "Bash(cmd //c taskkill //PID 23224 //F)",
-      "Bash(cmd //c taskkill //F //PID 34800)"
+      "Bash(cmd //c taskkill //F //PID 34800)",
+      "Bash(node migrate-lastactive.js:*)"
     ],
     "deny": [],
     "ask": []

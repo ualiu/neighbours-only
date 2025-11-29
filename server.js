@@ -62,6 +62,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// Activity tracking middleware
+const { updateActivity } = require('./middleware/activity');
+app.use(updateActivity);
+
 // Routes
 app.use('/', require('./routes/authRoutes'));
 app.use('/neighborhood', require('./routes/neighborhoodRoutes'));

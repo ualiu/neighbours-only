@@ -7,10 +7,12 @@
         <div class="card-body text-center">
             <h2 class="card-title mb-2">
                 <i class="bi bi-people-fill"></i>
-                Your Neighbours
+                Neighbors Online Now
             </h2>
             <p class="mb-0">
-                <span id="neighbourCount"><%= neighbours.length %></span> <%= neighbours.length === 1 ? 'neighbour' : 'neighbours' %> in <%= neighborhood.name %>
+                <i class="bi bi-circle-fill text-success" style="font-size: 0.6rem;"></i>
+                <span id="neighbourCount"><%= onlineCount %></span> <%= onlineCount === 1 ? 'neighbor' : 'neighbors' %> active
+                <span class="opacity-75">(<%= totalMembers %> total in <%= neighborhood.name %>)</span>
             </p>
         </div>
     </div>
@@ -44,11 +46,16 @@
             <div class="row g-3">
                 <% if (neighbours.length === 0) { %>
                     <div class="col-12">
-                        <div class="card">
+                        <div class="card border-0 shadow-sm">
                             <div class="card-body text-center py-5">
-                                <i class="bi bi-people text-muted" style="font-size: 4rem;"></i>
-                                <h4 class="mt-3">No neighbours yet</h4>
-                                <p class="text-muted">You're the first one here!</p>
+                                <i class="bi bi-moon-stars text-muted" style="font-size: 4rem;"></i>
+                                <h4 class="mt-3 mb-2">No neighbors online right now</h4>
+                                <p class="text-muted mb-3">
+                                    Check back later or be the first to post!
+                                </p>
+                                <a href="/neighborhood" class="btn btn-primary">
+                                    <i class="bi bi-chat-dots"></i> Go to Feed
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -322,7 +329,7 @@ function initMap() {
     neighboursData.forEach((neighbour, index) => {
         // Create SVG dot marker (larger for current user)
         const dotSize = neighbour.isCurrentUser ? 16 : 12;
-        const dotColor = neighbour.isCurrentUser ? '#DC3545' : '#0c0c18'; // Red for you, dark navy for others
+        const dotColor = neighbour.isCurrentUser ? '#3b82f6' : '#22c55e'; // Blue for you, green for others
 
         const svgMarker = {
             path: google.maps.SymbolPath.CIRCLE,

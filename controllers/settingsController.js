@@ -20,14 +20,23 @@ exports.showSettings = async (req, res) => {
 // @route   POST /settings/update
 exports.updateSettings = async (req, res) => {
   try {
-    const { showAddress } = req.body;
+    const { showAddress, showOnlineStatus } = req.body;
 
-    console.log('Updating settings:', { showAddress, type: typeof showAddress });
+    console.log('Updating settings:', { showAddress, showOnlineStatus });
+
+    // Build update object
+    const updateFields = {};
+
+    if (showAddress !== undefined) {
+      updateFields['settings.showAddress'] = showAddress === true || showAddress === 'on';
+    }
+
+    if (showOnlineStatus !== undefined) {
+      updateFields['settings.showOnlineStatus'] = showOnlineStatus === true || showOnlineStatus === 'on';
+    }
 
     // Update user settings
-    await User.findByIdAndUpdate(req.user._id, {
-      'settings.showAddress': showAddress === true || showAddress === 'on',
-    });
+    await User.findByIdAndUpdate(req.user._id, updateFields);
 
     console.log('Settings updated successfully for user:', req.user._id);
 

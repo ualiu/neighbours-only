@@ -68,6 +68,24 @@
                 </small>
               </label>
             </div>
+
+            <div class="form-check form-switch">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="showOnlineStatus"
+                name="showOnlineStatus"
+                <%= user.settings?.showOnlineStatus !== false ? 'checked' : '' %>
+              >
+              <label class="form-check-label" for="showOnlineStatus">
+                <strong>Show when I'm online</strong>
+                <br />
+                <small class="text-muted">
+                  When enabled, neighbors can see you're active on the members map.
+                  Turn this off if you prefer to browse privately.
+                </small>
+              </label>
+            </div>
           </form>
         </div>
       </div>
@@ -187,6 +205,30 @@ document.getElementById('showAddress').addEventListener('change', function() {
   .catch(error => {
     console.error('Error saving settings:', error);
   });
+
+// Auto-save online status setting
+document.getElementById('showOnlineStatus').addEventListener('change', function() {
+  const isChecked = this.checked;
+
+  fetch('/settings/update', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      showOnlineStatus: isChecked
+    })
+  })
+  .then(response => {
+    if (response.ok) {
+      const toast = new bootstrap.Toast(document.getElementById('settingsSavedToast'));
+      toast.show();
+    }
+  })
+  .catch(error => {
+    console.error('Error saving settings:', error);
+  });
+});
 });
 </script>
 

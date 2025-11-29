@@ -47,6 +47,14 @@ const userSchema = new mongoose.Schema(
         type: Boolean,
         default: true,
       },
+      showOnlineStatus: {
+        type: Boolean,
+        default: true,
+      },
+    },
+    lastActive: {
+      type: Date,
+      default: Date.now,
     },
   },
   {
