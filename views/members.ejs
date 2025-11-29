@@ -7,12 +7,12 @@
         <div class="card-body text-center">
             <h2 class="card-title mb-2">
                 <i class="bi bi-people-fill"></i>
-                Neighbors Online Now
+                Neighbors in <%= neighborhood.name %>
             </h2>
             <p class="mb-0">
                 <i class="bi bi-circle-fill text-success" style="font-size: 0.6rem;"></i>
-                <span id="neighbourCount"><%= onlineCount %></span> <%= onlineCount === 1 ? 'neighbor' : 'neighbors' %> active
-                <span class="opacity-75">(<%= totalMembers %> total in <%= neighborhood.name %>)</span>
+                <span id="neighbourCount"><%= onlineCount %></span> <%= onlineCount === 1 ? 'neighbor' : 'neighbors' %> online now
+                <span class="opacity-75">(<%= totalMembers %> total members)</span>
             </p>
         </div>
     </div>
@@ -126,10 +126,17 @@
 <script src="https://maps.googleapis.com/maps/api/js?key=<%= process.env.GOOGLE_PLACES_API_KEY %>&libraries=places,geometry"></script>
 
 <script>
-// Neighbours data for map
+// Neighbours data for map - ONLY show online users on the map
+const fiveMinutesAgo = <%= fiveMinutesAgo %>;
 const neighboursData = [
     <% neighbours.forEach(function(neighbour, index) { %>
-        <% if (neighbour.address && neighbour.address.lat && neighbour.address.lng) { %>
+        <%
+        // Check if neighbour is online
+        const isOnline = neighbour.lastActive &&
+                        new Date(neighbour.lastActive).getTime() >= fiveMinutesAgo &&
+                        neighbour.settings?.showOnlineStatus === true;
+        %>
+        <% if (neighbour.address && neighbour.address.lat && neighbour.address.lng && isOnline) { %>
         {
             name: '<%= neighbour.displayName %>',
             avatar: '<%= neighbour.avatar %>',
@@ -139,7 +146,7 @@ const neighboursData = [
         }<%= index < neighbours.length - 1 ? ',' : '' %>
         <% } %>
     <% }) %>
-];
+].filter(n => n); // Remove any empty entries
 
 let map;
 let markers = [];
@@ -326,7 +333,31 @@ function initMap() {
     }, 500);
 
     // Add markers for each neighbour
+    console.log('Total neighbours to render:', neighboursData.length);
+    const usedPositions = [];
+
     neighboursData.forEach((neighbour, index) => {
+        console.log(`Processing neighbour ${index}:`, neighbour.name, `at (${neighbour.lat}, ${neighbour.lng})`);
+        let lat = neighbour.lat;
+        let lng = neighbour.lng;
+
+        // Check if this exact position is already used
+        const positionKey = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+        const existingPosition = usedPositions.find(p => p.key === positionKey);
+
+        if (existingPosition) {
+            // Position already used - add offset so dots are clearly visible
+            const offsetMeters = 50; // 50 meters apart
+            const offsetDegrees = offsetMeters / 111320; // Convert meters to degrees
+            const angle = (existingPosition.count * (Math.PI * 2 / 8)); // Spread in circle
+            lat = lat + (offsetDegrees * Math.cos(angle));
+            lng = lng + (offsetDegrees * Math.sin(angle));
+            existingPosition.count++;
+            console.log(`Offsetting marker ${index} by ${offsetMeters}m at angle ${angle}`);
+        } else {
+            usedPositions.push({ key: positionKey, count: 1 });
+        }
+
         // Create SVG dot marker (larger for current user)
         const dotSize = neighbour.isCurrentUser ? 16 : 12;
         const dotColor = neighbour.isCurrentUser ? '#3b82f6' : '#22c55e'; // Blue for you, green for others
@@ -341,7 +372,7 @@ function initMap() {
         };
 
         const marker = new google.maps.Marker({
-            position: { lat: neighbour.lat, lng: neighbour.lng },
+            position: { lat: lat, lng: lng },
             map: map,
             title: neighbour.name,
             icon: svgMarker,
@@ -349,6 +380,8 @@ function initMap() {
             zIndex: neighbour.isCurrentUser ? 1000 : index,
             optimized: false
         });
+
+        console.log(`✓ Created marker for ${neighbour.name} at (${lat}, ${lng}) - Color: ${dotColor}`);
 
         // Add info window with profile card styling
         const infoWindow = new google.maps.InfoWindow({
@@ -366,7 +399,7 @@ function initMap() {
             pixelOffset: new google.maps.Size(0, -10)
         });
 
-        // Show on hover (mouseover) instead of click
+        // Show on hover (mouseover)
         marker.addListener('mouseover', () => {
             // Close all other info windows
             markers.forEach(m => m.infoWindow.close());
@@ -378,6 +411,13 @@ function initMap() {
             setTimeout(() => {
                 infoWindow.close();
             }, 300); // Small delay to allow moving to the info window
+        });
+
+        // Also show on click
+        marker.addListener('click', () => {
+            // Close all other info windows
+            markers.forEach(m => m.infoWindow.close());
+            infoWindow.open(map, marker);
         });
 
         markers.push({ marker, infoWindow });

@@ -8,10 +8,11 @@ const updateActivity = async (req, res, next) => {
   if (req.user && req.user._id) {
     try {
       // Update lastActive timestamp without triggering hooks
-      await User.updateOne(
+      const result = await User.updateOne(
         { _id: req.user._id },
         { lastActive: new Date() }
       );
+      console.log(`📍 Activity tracked for user ${req.user._id} (${req.user.displayName}) - matched: ${result.matchedCount}, modified: ${result.modifiedCount}`);
     } catch (error) {
       // Don't block request if update fails
       console.error('Activity tracking error:', error);

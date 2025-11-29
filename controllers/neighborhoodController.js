@@ -60,29 +60,29 @@ exports.showNeighbours = async (req, res) => {
       return res.redirect('/');
     }
 
-    // Get ONLY online neighbours (active in last 5 minutes who have showOnlineStatus enabled)
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-
-    const onlineNeighbours = await User.find({
+    // Get ALL neighbours in the neighborhood
+    const allNeighbours = await User.find({
       neighborhoodId: req.user.neighborhoodId,
-      lastActive: { $gte: fiveMinutesAgo },
-      'settings.showOnlineStatus': true
+      hasCompletedProfile: true
     })
       .select('displayName avatar createdAt address settings lastActive')
       .sort({ lastActive: -1 });
 
-    // Get total member count for display
-    const totalMembers = await User.countDocuments({
-      neighborhoodId: req.user.neighborhoodId,
-      hasCompletedProfile: true
-    });
+    // Determine who is online (active in last 5 minutes with showOnlineStatus enabled)
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+    const onlineCount = allNeighbours.filter(neighbour =>
+      neighbour.lastActive >= fiveMinutesAgo &&
+      neighbour.settings?.showOnlineStatus === true
+    ).length;
 
     res.render('members', {
       user: req.user,
       neighborhood,
-      neighbours: onlineNeighbours,
-      onlineCount: onlineNeighbours.length,
-      totalMembers
+      neighbours: allNeighbours,
+      onlineCount: onlineCount,
+      totalMembers: allNeighbours.length,
+      fiveMinutesAgo: fiveMinutesAgo.getTime() // Pass to view for online check
     });
   } catch (error) {
     console.error('Error loading neighbours:', error);

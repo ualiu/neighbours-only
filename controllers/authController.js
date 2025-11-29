@@ -83,18 +83,92 @@ exports.completeProfile = async (req, res) => {
       }
     });
 
-    // If no sublocality, try using locality as fallback
+    // Extract lat/lng early so we can use it for landmark search
+    const lat = placeDetails.geometry.location.lat;
+    const lng = placeDetails.geometry.location.lng;
+
+    // If no sublocality, try to find nearby landmarks (universities, parks, etc.)
     if (!sublocality && city) {
-      sublocality = city;
+      try {
+        // Search for nearby points of interest - try text search for cleaner results
+        const textSearchResponse = await axios.get(
+          'https://maps.googleapis.com/maps/api/place/textsearch/json',
+          {
+            params: {
+              query: `university near ${city}`,
+              location: `${lat},${lng}`,
+              radius: 2000, // 2km radius
+              type: 'university',
+              key: process.env.GOOGLE_PLACES_API_KEY,
+            },
+          }
+        );
+
+        console.log('Text search results:', textSearchResponse.data.results?.slice(0, 10).map(r => r.name));
+
+        // Use the closest landmark as neighborhood name if found
+        if (textSearchResponse.data.results && textSearchResponse.data.results.length > 0) {
+          // Look for main university names (without buildings, departments, etc.)
+          const excludeKeywords = [
+            'building', 'lab', 'centre', 'center', 'hall', 'wing',
+            'ec1', 'ec2', 'ec3', 'ec4', 'ec5',
+            'college', 'school of', 'society', 'parking', 'seminary', 'institute',
+            'faculty', 'department', 'library', 'campus', 'regional'
+          ];
+
+          // Exclude small affiliated colleges
+          const excludeColleges = ['st. jerome', 'renison', 'conrad grebel', 'luther', 'united college'];
+
+          // Sort by distance and filter
+          const sortedResults = textSearchResponse.data.results
+            .filter(result => {
+              const nameLower = result.name.toLowerCase();
+              const hasUniversity = nameLower.includes('university') || nameLower.includes('université');
+              const hasExcludedKeyword = excludeKeywords.some(keyword => nameLower.includes(keyword));
+              const isSmallCollege = excludeColleges.some(college => nameLower.includes(college));
+              // Filter out small affiliated colleges and buildings
+              return hasUniversity && !hasExcludedKeyword && !isSmallCollege;
+            })
+            .sort((a, b) => {
+              const nameA = a.name.toLowerCase();
+              const nameB = b.name.toLowerCase();
+
+              // Prioritize "University of X" pattern
+              const aIsUniversityOf = nameA.startsWith('university of');
+              const bIsUniversityOf = nameB.startsWith('university of');
+              if (aIsUniversityOf && !bIsUniversityOf) return -1;
+              if (!aIsUniversityOf && bIsUniversityOf) return 1;
+
+              // Then prefer simpler names (fewer words)
+              return a.name.split(' ').length - b.name.split(' ').length;
+            });
+
+          console.log('Filtered universities:', sortedResults.map(r => r.name));
+
+          if (sortedResults.length > 0) {
+            sublocality = sortedResults[0].name;
+            console.log(`Using landmark as neighborhood: ${sublocality}`);
+          } else {
+            // Fall back to city
+            sublocality = city;
+            console.log(`No suitable landmark found, using city: ${sublocality}`);
+          }
+        } else {
+          // Fall back to city name
+          sublocality = city;
+          console.log(`No landmark found, using city: ${sublocality}`);
+        }
+      } catch (error) {
+        console.error('Error searching for nearby landmarks:', error);
+        // Fall back to city name on error
+        sublocality = city;
+      }
     }
 
     if (!sublocality || !city) {
       req.flash('error', 'Unable to determine neighborhood from this address. Please try a more specific address.');
       return res.redirect('/signup/address');
     }
-
-    const lat = placeDetails.geometry.location.lat;
-    const lng = placeDetails.geometry.location.lng;
 
     // Generate neighborhood key (lowercase, hyphen-separated)
     const neighborhoodKey = `${sublocality.toLowerCase().replace(/\s+/g, '-')}-${city.toLowerCase().replace(/\s+/g, '-')}-${province.toLowerCase()}`;
