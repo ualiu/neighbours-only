@@ -20,9 +20,9 @@ exports.showSettings = async (req, res) => {
 // @route   POST /settings/update
 exports.updateSettings = async (req, res) => {
   try {
-    const { showAddress, showOnlineStatus } = req.body;
+    const { showAddress, showOnlineStatus, emailOnComment, emailOnNewPost } = req.body;
 
-    console.log('Updating settings:', { showAddress, showOnlineStatus });
+    console.log('Updating settings:', { showAddress, showOnlineStatus, emailOnComment, emailOnNewPost });
 
     // Build update object
     const updateFields = {};
@@ -33,6 +33,14 @@ exports.updateSettings = async (req, res) => {
 
     if (showOnlineStatus !== undefined) {
       updateFields['settings.showOnlineStatus'] = showOnlineStatus === true || showOnlineStatus === 'on';
+    }
+
+    if (emailOnComment !== undefined) {
+      updateFields['settings.emailOnComment'] = emailOnComment === true || emailOnComment === 'on';
+    }
+
+    if (emailOnNewPost !== undefined) {
+      updateFields['settings.emailOnNewPost'] = emailOnNewPost === true || emailOnNewPost === 'on';
     }
 
     // Update user settings

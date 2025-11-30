@@ -90,6 +90,51 @@
         </div>
       </div>
 
+      <!-- Notification Settings -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title mb-3">
+            <i class="bi bi-bell-fill"></i>
+            Email Notifications
+          </h5>
+          <form action="/settings/update" method="POST">
+            <div class="form-check form-switch mb-3">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="emailOnComment"
+                name="emailOnComment"
+                <%= user.settings?.emailOnComment !== false ? 'checked' : '' %>
+              >
+              <label class="form-check-label" for="emailOnComment">
+                <strong>Email me when someone comments on my posts</strong>
+                <br />
+                <small class="text-muted">
+                  Get notified when neighbors reply to your posts.
+                </small>
+              </label>
+            </div>
+
+            <div class="form-check form-switch">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="emailOnNewPost"
+                name="emailOnNewPost"
+                <%= user.settings?.emailOnNewPost !== false ? 'checked' : '' %>
+              >
+              <label class="form-check-label" for="emailOnNewPost">
+                <strong>Email me when there are new posts</strong>
+                <br />
+                <small class="text-muted">
+                  Get notified when neighbors create new posts in your community.
+                </small>
+              </label>
+            </div>
+          </form>
+        </div>
+      </div>
+
       <!-- Danger Zone -->
       <div class="card border-danger mb-4">
         <div class="card-body">
@@ -217,6 +262,54 @@ document.getElementById('showOnlineStatus').addEventListener('change', function(
     },
     body: JSON.stringify({
       showOnlineStatus: isChecked
+    })
+  })
+  .then(response => {
+    if (response.ok) {
+      const toast = new bootstrap.Toast(document.getElementById('settingsSavedToast'));
+      toast.show();
+    }
+  })
+  .catch(error => {
+    console.error('Error saving settings:', error);
+  });
+});
+
+// Auto-save emailOnComment setting
+document.getElementById('emailOnComment').addEventListener('change', function() {
+  const isChecked = this.checked;
+
+  fetch('/settings/update', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      emailOnComment: isChecked
+    })
+  })
+  .then(response => {
+    if (response.ok) {
+      const toast = new bootstrap.Toast(document.getElementById('settingsSavedToast'));
+      toast.show();
+    }
+  })
+  .catch(error => {
+    console.error('Error saving settings:', error);
+  });
+});
+
+// Auto-save emailOnNewPost setting
+document.getElementById('emailOnNewPost').addEventListener('change', function() {
+  const isChecked = this.checked;
+
+  fetch('/settings/update', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      emailOnNewPost: isChecked
     })
   })
   .then(response => {

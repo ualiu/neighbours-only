@@ -1,5 +1,6 @@
 const Comment = require('../models/Comment');
 const Post = require('../models/Post');
+const { sendCommentNotification } = require('../services/emailService');
 
 // @desc    Create a comment on a post
 // @route   POST /comments/create
@@ -18,7 +19,7 @@ exports.createComment = async (req, res) => {
     }
 
     // Verify post exists and belongs to same neighborhood
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId).populate('userId', 'displayName email settings');
 
     if (!post) {
       req.flash('error', 'Post not found');
@@ -40,6 +41,23 @@ exports.createComment = async (req, res) => {
     // Increment comment count on post
     post.commentCount += 1;
     await post.save();
+
+    // Send email notification to post author (if they have notifications enabled)
+    console.log(`💬 Comment created by ${req.user.email} on post by ${post.userId.email}`);
+    console.log(`💬 Post author emailOnComment setting: ${post.userId.settings?.emailOnComment}`);
+
+    if (post.userId.settings?.emailOnComment !== false) {
+      console.log(`💬 Sending comment notification to ${post.userId.email}`);
+      sendCommentNotification({
+        postAuthor: post.userId,
+        commenter: req.user,
+        postText: post.text,
+        commentText: text.trim(),
+        postId: post._id,
+      }).catch((err) => console.error('Failed to send comment notification:', err));
+    } else {
+      console.log(`💬 Skipping notification - user has disabled comment notifications`);
+    }
 
     res.redirect('/neighborhood');
   } catch (error) {

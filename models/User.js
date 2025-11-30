@@ -55,6 +55,14 @@ const userSchema = new mongoose.Schema(
         type: Boolean,
         default: true,
       },
+      emailOnComment: {
+        type: Boolean,
+        default: true,
+      },
+      emailOnNewPost: {
+        type: Boolean,
+        default: true,
+      },
     },
     lastActive: {
       type: Date,

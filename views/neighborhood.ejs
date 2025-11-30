@@ -112,14 +112,21 @@
         </form>
       </div>
 
-      <!-- First user growth prompt (shows when only 1 member) -->
-      <% if (neighborhood.memberCount === 1) { %>
+      <!-- Founding members growth prompt (shows for first 10 members) -->
+      <% if (neighborhood.memberCount <= 10) { %>
       <div class="alert alert-info border-0 mb-3">
-        <strong>The First Neighbour Has Arrived</strong>
+        <strong
+          ><% if (neighborhood.memberCount === 1) { %>Welcome to <%=
+          neighborhood.name %>!<% } %></strong
+        >
         <p class="mb-2 small">
-          Thanks to your curiosity, you arrived before everyone else. Now lead
-          your neighbours here because NeighboursOnly.com becomes truly fun when
-          others join in. Share this space on your Facebook neighbourhood group.
+          <% if (neighborhood.memberCount === 1) { %> Thanks to your curiosity,
+          you arrived before everyone else. NeighboursOnly.com becomes truly fun
+          when others join in. Invite other neighbours here by sharing
+          NeighboursOnly.com in your local Facebook group. <% } else { %> You're
+          one of the first neighbours to join the <%= neighborhood.name %>
+          community! Invite other neighbours to join by sharing
+          NeighboursOnly.com in your local Facebook group. <% } %>
         </p>
         <button class="btn btn-sm btn-primary" onclick="copyInviteLink()">
           <i class="bi bi-link-45deg"></i> Copy Invite Link

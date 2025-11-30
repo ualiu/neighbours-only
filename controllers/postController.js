@@ -1,7 +1,9 @@
 const Post = require('../models/Post');
 const Neighborhood = require('../models/Neighborhood');
+const User = require('../models/User');
 const { cloudinary } = require('../config/cloudinary');
 const moderationService = require('../services/moderationService');
+const { sendNewPostNotification } = require('../services/emailService');
 
 // @desc    Show create post form
 // @route   GET /posts/new
@@ -120,6 +122,28 @@ exports.createPost = async (req, res) => {
     // }
 
     // 🟢 GREEN LANE - All posts auto-approved
+
+    // Send email notifications to neighborhood members (async, don't wait)
+    const neighborhood = await Neighborhood.findById(req.user.neighborhoodId);
+    const neighborhoodMembers = await User.find({
+      neighborhoodId: req.user.neighborhoodId,
+      _id: { $ne: req.user._id }, // Exclude post author
+    });
+
+    console.log(`📧 Found ${neighborhoodMembers.length} neighbors to notify about new post`);
+
+    // Send notifications asynchronously (don't block response)
+    neighborhoodMembers.forEach((member) => {
+      console.log(`📧 Sending notification to: ${member.email} (emailOnNewPost: ${member.settings?.emailOnNewPost})`);
+      sendNewPostNotification({
+        recipient: member,
+        author: req.user,
+        postText: text.trim(),
+        postId: post._id,
+        neighborhood,
+      }).catch((err) => console.error('Failed to send new post notification:', err));
+    });
+
     req.flash('success', 'Post created successfully!');
     res.redirect('/neighborhood');
   } catch (error) {
