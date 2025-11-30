@@ -1,24 +1,14 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// Create transporter
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT) || 587,
-  secure: parseInt(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+// Initialize Resend client
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Verify connection configuration
-transporter.verify(function (error, success) {
-  if (error) {
-    console.error('Email service error:', error);
-  } else {
-    console.log('✉️  Email service is ready');
-  }
-});
+// Verify Resend is configured
+if (process.env.RESEND_API_KEY) {
+  console.log('✉️  Email service is ready (Resend)');
+} else {
+  console.error('❌ RESEND_API_KEY not configured');
+}
 
 /**
  * Send email notification when someone comments on a user's post
@@ -29,11 +19,12 @@ const sendCommentNotification = async ({ postAuthor, commenter, postText, commen
     return;
   }
 
-  const mailOptions = {
-    from: process.env.EMAIL_FROM,
-    to: postAuthor.email,
-    subject: `${commenter.displayName} commented on your post`,
-    html: `
+  try {
+    const result = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'NeighboursOnly <onboarding@resend.dev>',
+      to: postAuthor.email,
+      subject: `${commenter.displayName} commented on your post`,
+      html: `
       <!DOCTYPE html>
       <html>
       <head>
@@ -83,13 +74,11 @@ const sendCommentNotification = async ({ postAuthor, commenter, postText, commen
       </body>
       </html>
     `,
-  };
-
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log(`✉️  Comment notification sent to ${postAuthor.email}`);
+    });
+    console.log(`✉️  Comment notification sent to ${postAuthor.email}`, result);
   } catch (error) {
     console.error('Error sending comment notification:', error);
+    console.error('Full error details:', JSON.stringify(error, null, 2));
   }
 };
 
@@ -113,11 +102,12 @@ const sendDailyDigest = async ({ user, posts, neighborhood }) => {
     )
     .join('');
 
-  const mailOptions = {
-    from: process.env.EMAIL_FROM,
-    to: user.email,
-    subject: `${posts.length} new ${posts.length === 1 ? 'post' : 'posts'} in ${neighborhood.name}`,
-    html: `
+  try {
+    await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'NeighboursOnly <onboarding@resend.dev>',
+      to: user.email,
+      subject: `${posts.length} new ${posts.length === 1 ? 'post' : 'posts'} in ${neighborhood.name}`,
+      html: `
       <!DOCTYPE html>
       <html>
       <head>
@@ -152,10 +142,7 @@ const sendDailyDigest = async ({ user, posts, neighborhood }) => {
       </body>
       </html>
     `,
-  };
-
-  try {
-    await transporter.sendMail(mailOptions);
+    });
     console.log(`✉️  Daily digest sent to ${user.email}`);
   } catch (error) {
     console.error('Error sending daily digest:', error);
@@ -166,11 +153,12 @@ const sendDailyDigest = async ({ user, posts, neighborhood }) => {
  * Send welcome email to new users
  */
 const sendWelcomeEmail = async ({ user, neighborhood }) => {
-  const mailOptions = {
-    from: process.env.EMAIL_FROM,
-    to: user.email,
-    subject: `Welcome to ${neighborhood.name} on NeighboursOnly!`,
-    html: `
+  try {
+    await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'NeighboursOnly <onboarding@resend.dev>',
+      to: user.email,
+      subject: `Welcome to ${neighborhood.name} on NeighboursOnly!`,
+      html: `
       <!DOCTYPE html>
       <html>
       <head>
@@ -222,10 +210,7 @@ const sendWelcomeEmail = async ({ user, neighborhood }) => {
       </body>
       </html>
     `,
-  };
-
-  try {
-    await transporter.sendMail(mailOptions);
+    });
     console.log(`✉️  Welcome email sent to ${user.email}`);
   } catch (error) {
     console.error('Error sending welcome email:', error);
@@ -246,11 +231,12 @@ const sendNewPostNotification = async ({ recipient, author, postText, postId, ne
     return;
   }
 
-  const mailOptions = {
-    from: process.env.EMAIL_FROM,
-    to: recipient.email,
-    subject: `${author.displayName} posted in ${neighborhood.name}`,
-    html: `
+  try {
+    const result = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'NeighboursOnly <onboarding@resend.dev>',
+      to: recipient.email,
+      subject: `${author.displayName} posted in ${neighborhood.name}`,
+      html: `
       <!DOCTYPE html>
       <html>
       <head>
@@ -297,13 +283,11 @@ const sendNewPostNotification = async ({ recipient, author, postText, postId, ne
       </body>
       </html>
     `,
-  };
-
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log(`✉️  New post notification sent to ${recipient.email}`);
+    });
+    console.log(`✉️  New post notification sent to ${recipient.email}`, result);
   } catch (error) {
     console.error('Error sending new post notification:', error);
+    console.error('Full error details:', JSON.stringify(error, null, 2));
   }
 };
 

@@ -22,17 +22,23 @@ exports.showFeed = async (req, res) => {
       .populate('userId', 'displayName avatar')
       .sort({ createdAt: -1 });
 
+    // Filter out posts where the user has been deleted
+    const validPosts = posts.filter(post => post.userId !== null);
+
     // Get comments for each post
     const postsWithComments = await Promise.all(
-      posts.map(async (post) => {
+      validPosts.map(async (post) => {
         const comments = await Comment.find({ postId: post._id })
           .populate('userId', 'displayName avatar')
           .sort({ createdAt: 1 })
           .limit(3); // Show latest 3 comments initially
 
+        // Filter out comments where user has been deleted
+        const validComments = comments.filter(comment => comment.userId !== null);
+
         return {
           ...post.toObject(),
-          comments,
+          comments: validComments,
         };
       })
     );
@@ -115,17 +121,23 @@ exports.searchPosts = async (req, res) => {
         .populate('userId', 'displayName avatar')
         .sort({ createdAt: -1 });
 
+      // Filter out posts where the user has been deleted
+      const validPosts = posts.filter(post => post.userId !== null);
+
       // Get comments for each post
       const postsWithComments = await Promise.all(
-        posts.map(async (post) => {
+        validPosts.map(async (post) => {
           const comments = await Comment.find({ postId: post._id })
             .populate('userId', 'displayName avatar')
             .sort({ createdAt: 1 })
             .limit(3);
 
+          // Filter out comments where user has been deleted
+          const validComments = comments.filter(comment => comment.userId !== null);
+
           return {
             ...post.toObject(),
-            comments,
+            comments: validComments,
           };
         })
       );
